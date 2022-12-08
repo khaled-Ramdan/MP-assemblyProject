@@ -1,11 +1,4 @@
-
-
-
-
-
-
-
-           ;;-------------- PROGRAM STARTS-------------------------
+     ;;-------------- PROGRAM STARTS-------------------------
 
 maindata:
    
@@ -52,9 +45,5 @@ maindata:
     mov player1,0c02h
     jmp plot 
     
-        
-                      
-                      
-    
-    
-    ;SET BOUNDRY/PLAY AREA 
+
+;SET BOUNDRY/PLAY AREA 
