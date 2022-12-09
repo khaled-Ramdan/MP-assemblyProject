@@ -22,3 +22,28 @@ msg1  db  "Choose player theme: (1) Blue (2) Red (3) Magenta (4) Cyan (5) Green 
 score dw 02h   
 
 ;;-------------- PROGRAM STARTS-------------------------
+
+
+;;-------------------------SET BOUNDRY/PLAY AREA -------
+    plot:     
+        ;SET TO GRAPHICS DISPLAY MODE   
+    
+        mov ax, 0013h
+        int 10h
+    
+        mov ax, 0
+        mov bx, 0   
+        mov cx, gameWidth
+        call horizontalBoundry
+        
+        mov cx, gameHeight
+        call verticallBoundry 
+           
+        add ax, gameWidth
+        call verticallBoundry
+        
+        mov ax, 0
+        mov bx, gameHeight
+        mov cx, gameWidth
+        call horizontalBoundry  
+    
