@@ -47,3 +47,20 @@ score dw 02h
         mov cx, gameWidth
         call horizontalBoundry  
     
+ ;;---------------------MAIN LOOP----------------------------
+    mov cx, 0  
+    mainloop:
+        call drawPaddleL 
+        call drawPaddleR 
+        call drawBall
+        call updateBall 
+        call updatePadL 
+        call checkBall_CollisionL     
+        call updatePadR   
+        call checkBall_CollisionR 
+        
+    
+    loop mainloop
+    
+       
+    ret    
