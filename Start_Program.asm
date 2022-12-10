@@ -1,5 +1,4 @@
      ;;-------------- PROGRAM STARTS-------------------------
-
 maindata:
    
     mov dx, offset msg1
@@ -45,5 +44,4 @@ maindata:
     mov player1,0c02h
     jmp plot 
     
-
 ;SET BOUNDRY/PLAY AREA 
