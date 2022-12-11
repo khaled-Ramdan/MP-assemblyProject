@@ -64,3 +64,44 @@ score dw 02h
     
        
     ret    
+    ;;-------------------DRAW FUNCTIONS--------------------------    
+    
+    ;Left Paddle
+    drawPaddleL:
+        push ax
+        push bx
+        push cx
+        
+        mov ax, lpad[0]
+        mov bx, lpad[2]
+        mov cx, lpad[6]
+        call vert_line_unplot
+        
+        mov ax, lpad[8]
+        mov bx, lpad[10]
+        call verticallBoundry
+        
+        pop cx
+        pop bx
+        pop ax
+        ret
+    
+    ;Right Paddle
+    drawPaddleR:
+        push ax
+        push bx
+        push cx
+        
+        mov ax, rpad[0]
+        mov bx, rpad[2]
+        mov cx, rpad[6]
+        call vert_line_unplot
+        
+        mov ax, rpad[8]
+        mov bx, rpad[10]
+        call verticallBoundry
+        
+        pop cx
+        pop bx
+        pop ax
+        ret
