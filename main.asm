@@ -105,3 +105,42 @@ score dw 02h
         pop bx
         pop ax
         ret
+      
+      ;Draws Ball
+    drawBall:
+        push ax
+        push bx
+        push cx
+        push dx
+        
+        
+        mov ax, ball[0]
+        mov cx, ax
+        mov bx, ball[2]
+        mov dx, bx
+        
+        add cx, ball[8]
+        dec cx
+        add dx, ball[8]
+        dec dx
+        
+        call rect_unplot
+        
+        mov ax, ball[10]
+        mov cx, ax
+        mov bx, ball[12]
+        mov dx, bx
+        
+        add cx, ball[8]
+        dec cx
+        add dx, ball[8]
+        dec dx
+        
+        call rect_plot
+        
+        pop dx
+        pop cx
+        pop bx
+        pop ax 
+        ret           
+        
