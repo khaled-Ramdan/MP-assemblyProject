@@ -188,3 +188,49 @@ maindata:
         pop ax 
         ret           
         
+;;---------------------PLOT PLAY AREA----------------------------   
+
+     rect_plot:
+        push ax
+        push bx
+        push cx
+        push dx
+        push di
+        push si
+        
+        push ax                         ;Store the origin x in the stack
+        
+        mov di, cx 
+        mov si, dx 
+         
+        mov cx, ax
+        mov dx, bx
+        mov ax, 0c0eh                   ;Color of rectangle - the right-most hex char 
+        
+        rect_loop:
+        int 10h                         ;Draw Pixel
+        
+        inc cx 
+        cmp cx, di                      ;Check if xpos > destination x
+        jng rect_loop
+        
+        pop cx                          ;Xpos to the origin x
+        push cx
+        
+        inc dx
+        cmp dx, si                      ;Check if ypos > destination y
+        jng rect_loop
+        
+        pop si
+        pop si
+        pop di
+        pop dx
+        pop cx
+        pop bx
+        pop ax
+        
+        ret
+        
+    
+
+    
