@@ -345,3 +345,34 @@ maindata:
         pop ax 
         
         ret
+        
+        move_pixel:
+        push bx
+        push ax
+        
+        ;cx and dx are popped within the function
+        push dx
+        push cx
+        
+        mov cx, ax
+        mov dx, bx
+        
+        ;store the old color in bl
+        mov ax, 0d00h
+        int 10h
+        mov bl, al
+        
+        ;un-plot the old pixel   - replace with black
+        mov ax, 0c00h
+        int 10h
+        
+        ;plot the new pixel
+        mov al, bl
+        mov ah, 0ch
+        pop cx
+        pop dx
+        int 10h
+        
+        pop ax
+        pop bx
+        ret
