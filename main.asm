@@ -321,3 +321,15 @@ maindata:
         pop ax
         
         ret
+        
+         horizontalBoundry:
+        push ax
+        push bx
+        push cx
+        push dx
+        
+        ;moving values around for pixel plotting
+        mov dx, bx
+        mov bx, cx
+        mov cx, ax
+        mov ax, 0c01h
