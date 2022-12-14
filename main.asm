@@ -376,3 +376,18 @@ maindata:
         pop ax
         pop bx
         ret
+        
+         plot_pixel:
+        push ax
+        push cx
+        push dx
+        
+        mov cx, ax
+        mov dx, bx
+        mov ax, 0c0fh
+        int 10h
+        
+        pop dx
+        pop cx
+        pop ax
+        ret
