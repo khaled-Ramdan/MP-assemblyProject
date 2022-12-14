@@ -333,3 +333,15 @@ maindata:
         mov bx, cx
         mov cx, ax
         mov ax, 0c01h
+        horiz_loop:
+        int 10h
+        inc cx
+        dec bx
+        jns horiz_loop
+        
+        pop dx
+        pop cx
+        pop bx
+        pop ax 
+        
+        ret
