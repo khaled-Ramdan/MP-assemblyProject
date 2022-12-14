@@ -297,4 +297,27 @@ maindata:
         
         ret
 
-    
+    vert_line_unplot:
+        push ax
+        push bx
+        push cx
+        push dx
+        
+        ;moving values around for pixel plotting
+        mov dx, bx
+        mov bx, cx
+        mov cx, ax
+        mov ax, 0c00h
+        
+        vert_loopu:
+        int 10h
+        inc dx
+        dec bx
+        jns vert_loopu
+        
+        pop dx
+        pop cx
+        pop bx
+        pop ax
+        
+        ret
