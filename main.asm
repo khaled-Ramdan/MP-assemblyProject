@@ -231,6 +231,70 @@ maindata:
         
         ret
         
+        rect_unplot:
+        push ax
+        push bx
+        push cx
+        push dx
+        push di
+        push si
+        
+        push ax 
+        
+        mov di, cx
+        mov si, dx 
+        mov cx, ax
+        mov dx, bx
+        mov ax, 0c00h              ;the right-most hex char is the color of the rectangle   - change color to see path - 0c03h
+        
+        rect_loop2:
+        int 10h 
+        
+        inc cx 
+        cmp cx, di                  
+        jng rect_loop2
+        
+        pop cx                     
+        push cx
+        
+        inc dx
+        cmp dx, si                 
+        jng rect_loop2
+        pop si
+        pop si
+        pop di
+        pop dx
+        pop cx
+        pop bx
+        pop ax
+        
+        ret
     
+
+    
+    verticallBoundry:
+        push ax
+        push bx
+        push cx
+        push dx
+        
+        ;moving values around for pixel plotting
+        mov dx, bx
+        mov bx, cx
+        mov cx, ax
+        mov ax, player1
+        
+        vert_loop:
+        int 10h
+        inc dx
+        dec bx
+        jns vert_loop
+        
+        pop dx
+        pop cx
+        pop bx
+        pop ax
+        
+        ret
 
     
