@@ -3,9 +3,14 @@ STACK SEGMENT PARA STACK
 STACK ENDS
 
 DATA SEGMENT PARA 'DATA'
+
+	TIME_AUX DB 0; variable used when checking if the time has changed
+	
 	BALL_X DW 0Ah; x position (coloum) of the ball
 	BALL_Y DW 64h; y position (line) of the ball 
 	BALL_SIZE DW 06h;size of the ball (how many pixels does the ball have in width and height)
+	BALL_VELOCITY_X DW 02h; x velocity of the ball (horizontal)
+	BALL_VELOCITY_y DW 02h; y velocity of the ball (vertical)
 	
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   start paddle   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
@@ -22,7 +27,6 @@ DATA SEGMENT PARA 'DATA'
 	PADDLE_VELOCITY DW 05H                      ; velocity of the paddle
 	
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   end paddle   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 	
 DATA ENDS 
 
@@ -41,6 +45,37 @@ CODE SEGMENT PARA 'CODE'
 	
 	
 	
+		CALL CLEAR_SCREAN
+		CHECK_TIME:
+			MOV AH,2Ch;get the system time 
+			INT 21h ; CH = hour CL = minute DH = second DL = 1/100 second
+			
+			CMP CL,TIME_AUX; is the current time equal to the previous one(TIME_AUX)?
+			JE CHECK_TIME	;if it is the same => check again
+			MOV TIME_AUX, DL;update time
+			
+			CALL CLEAR_SCREAN;  clear the screen before drawing ball
+			CALL MOVE_BALL; moving the ball procedure
+			CALL DRAW_BALL; draw ball
+		
+			JMP  CHECK_TIME ; after everything checks => check time again
+			
+
+		RET
+	MAIN ENDP
+	
+	
+	MOVE_BALL PROC NEAR
+		MOV AX,BALL_VELOCITY_X
+		ADD BALL_X, AX
+		MOV AX,BALL_VELOCITY_Y
+		ADD BALL_Y, AX
+		RET
+	MOVE_BALL ENDP
+	
+	
+	
+	CLEAR_SCREAN PROC NEAR
 		MOV AH,00h;set the configuration to vedio mode
 		MOV AL,13h;choose the vedio mode
 		INT 10h	  ;execute the configuration 
@@ -50,11 +85,10 @@ CODE SEGMENT PARA 'CODE'
 		MOV BH,00h;to background color
 		MOV BL,00H;choose black as background
 		INT 10h; execute the configuration
-		
-		CALL DRAW_BALL
-
+	
 		RET
-	MAIN ENDP
+	CLEAR_SCREAN ENDP
+	
 	
 	
 	DRAW_BALL PROC NEAR                  
@@ -81,12 +115,8 @@ CODE SEGMENT PARA 'CODE'
 			SUB AX,BALL_Y
 			CMP AX,BALL_SIZE
 			JNG DRAW_BALL_HORIZONTAL
-		
+			
 		RET
 	DRAW_BALL ENDP
-	
-	
-	
-	
 CODE ENDS
 END
