@@ -50,7 +50,7 @@ CODE SEGMENT PARA 'CODE'
 			MOV AH,2Ch;get the system time 
 			INT 21h ; CH = hour CL = minute DH = second DL = 1/100 second
 			
-			CMP CL,TIME_AUX; is the current time equal to the previous one(TIME_AUX)?
+			CMP DL,TIME_AUX; is the current time equal to the previous one(TIME_AUX)?
 			JE CHECK_TIME	;if it is the same => check again
 			MOV TIME_AUX, DL;update time
 			
