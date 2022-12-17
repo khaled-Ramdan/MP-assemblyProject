@@ -7,7 +7,22 @@ DATA SEGMENT PARA 'DATA'
 	BALL_Y DW 64h; y position (line) of the ball 
 	BALL_SIZE DW 06h;size of the ball (how many pixels does the ball have in width and height)
 	
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   start paddle   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
+	;; Left Paddle ;;
+	PADDLE_LEFT_X  DW 0AH                       ; position of left paddle  X
+	PADDLE_LEFT_Y  DW 0AH			    ; position of left paddle  Y
+	;; Right paddle ;;
+	PADDLE_RIGHT_X  DW 130H                     ; position of right paddle  X
+	PADDLE_RIGHT_Y  DW 0AH			    ; position of right paddle  Y
+	;; size of paddles ;;
+	PADDLE_WIDTH   DW 05H                       ; width of the paddle
+	PADDLE_HEIGHT  DW 1FH                       ; height of the paddle
+	;; move by this value ;;
+	PADDLE_VELOCITY DW 05H                      ; velocity of the paddle
+	
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   end paddle   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 	
 DATA ENDS 
 
@@ -69,5 +84,9 @@ CODE SEGMENT PARA 'CODE'
 		
 		RET
 	DRAW_BALL ENDP
+	
+	
+	
+	
 CODE ENDS
 END
