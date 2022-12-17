@@ -4,9 +4,17 @@ STACK ENDS
 
 DATA SEGMENT PARA 'DATA'
 
+	WINDOW_WIDTH DW 140h ;The width of the window (320 pixels)
+	WINDOW_HEIGHT DW  0C8h ; the height of the window (200 pixels)
+	WINDOW_BOUNDS DW 6;variable used to check collsions eaerly
+	
 	TIME_AUX DB 0; variable used when checking if the time has changed
 	
-	BALL_X DW 0Ah; x position (coloum) of the ball
+	BALL_ORIGINAL_X DW 0A0h
+	BALL_ORIGINAL_Y DW 64h
+	
+	
+	BALL_X DW 0A0h; x position (coloum) of the ball
 	BALL_Y DW 64h; y position (line) of the ball 
 	BALL_SIZE DW 06h;size of the ball (how many pixels does the ball have in width and height)
 	BALL_VELOCITY_X DW 02h; x velocity of the ball (horizontal)
@@ -64,17 +72,51 @@ CODE SEGMENT PARA 'CODE'
 		RET
 	MAIN ENDP
 	
-	
+	;...................................MOVE BALL..................
 	MOVE_BALL PROC NEAR
-		MOV AX,BALL_VELOCITY_X
-		ADD BALL_X, AX
-		MOV AX,BALL_VELOCITY_Y
+	;move the ball horizontally
+		MOV AX,BALL_VELOCITY_X 
+		ADD BALL_X, AX		   
+		
+		;ball x < 0 (y => collided)
+		MOV AX,WINDOW_BOUNDS
+		CMP BALL_X,AX
+		JL RESET_POSITOIN
+	
+		;ball x > window_width -ball size - window bounds (y=>collided) 
+		MOV AX,WINDOW_WIDTH
+		SUB AX,BALL_SIZE
+		SUB AX,WINDOW_BOUNDS
+		CMP BALL_X,AX
+		JG RESET_POSITOIN 
+		
+	;move the ball vertically
+		MOV AX,BALL_VELOCITY_Y 
 		ADD BALL_Y, AX
+		
+		;ball y < 0 (x=>collided)
+		MOV AX,WINDOW_BOUNDS
+		CMP BALL_Y ,AX
+		JL NEG_VELOCITY_Y
+		;BALL Y > WINDOW_HEIGHT -ball size- window bounds  (X=>collided)
+		MOV AX,WINDOW_HEIGHT
+		SUB AX,BALL_SIZE
+		SUB AX,WINDOW_BOUNDS
+		CMP BALL_Y,AX
+		JG NEG_VELOCITY_Y
+		
 		RET
+		;.......negate velocity
+		RESET_POSITOIN:
+			CALL RESET_BALL_POSITION ; BALL_VELOCITY_X = -BALL_VELOCITY_X
+			RET
+		NEG_VELOCITY_Y:
+			NEG BALL_VELOCITY_Y ; BALL_VELOCITY_Y = -BALL_VELOCITY_Y
+			RET
 	MOVE_BALL ENDP
 	
 	
-	
+	;....................................CLEAR SCREAN................
 	CLEAR_SCREAN PROC NEAR
 		MOV AH,00h;set the configuration to vedio mode
 		MOV AL,13h;choose the vedio mode
@@ -90,7 +132,7 @@ CODE SEGMENT PARA 'CODE'
 	CLEAR_SCREAN ENDP
 	
 	
-	
+	;...................................DRAW BALL..................
 	DRAW_BALL PROC NEAR                  
 		
 		MOV CX,BALL_X                    ;set the initial column (X)
@@ -118,5 +160,15 @@ CODE SEGMENT PARA 'CODE'
 			
 		RET
 	DRAW_BALL ENDP
+	;..............................RESET BALL....................
+	RESET_BALL_POSITION PROC NEAR
+		MOV AX,BALL_ORIGINAL_X
+		MOV BALL_X,AX
+		
+		MOV AX,BALL_ORIGINAL_Y
+		MOV BALL_Y,AX
+	
+		RET
+	RESET_BALL_POSITION ENDP
 CODE ENDS
 END
