@@ -65,7 +65,9 @@ CODE SEGMENT PARA 'CODE'
 			CALL CLEAR_SCREAN;  clear the screen before drawing ball
 			CALL MOVE_BALL; moving the ball procedure
 			CALL DRAW_BALL; draw ball
-		
+			
+			CALL DRAW_PADDLE    ; set the size of paddle
+
 			JMP  CHECK_TIME ; after everything checks => check time again
 			
 
@@ -205,6 +207,35 @@ CODE SEGMENT PARA 'CODE'
 			JNG DRAW_PADDLE_LEFT_SIZE         ; Jump if Not Greater (not >).
 			MOV DX,PADDLE_LEFT_Y              ; Dx return to the initial
 			
+			
+		;; right paddle ;;
+		MOV CX,PADDLE_RIGHT_X                 ; set the (x) position
+		MOV DX,PADDLE_RIGHT_Y                 ; set the (Y) position
+		
+		DRAW_PADDLE_RIGHT_SIZE:                   ; loop to draw the horizontal pixels of the PADDLE
+		
+			MOV AH,0CH      		  ; set the configuration to write pixel
+			MOV AL,0FH                        ; white color
+			MOV BH,00H                        
+			INT 10H
+			
+			;;;; horizontal ;;;;
+			INC CX                            ; increment x"column" by one 
+			;;;; check if paddle reaches to the specific size or not ;;;;
+			MOV AX, CX
+			SUB AX,PADDLE_RIGHT_X
+			CMP AX,PADDLE_WIDTH               ; if (cx-PADDLE_RIGHT_X)>PADDLE_WIDTH , break ; else continue to the next column 
+			JNG DRAW_PADDLE_RIGHT_SIZE        ; Jump if Not Greater (not >).
+			MOV CX,PADDLE_RIGHT_X             ; cx return to the initial
+			
+			;;;; vertical  ;;;;
+			INC DX                            ; increment Y"row" by one 
+			;;;; check if PADDLE reaches to the specific size or not ;;;;
+			MOV AX, DX
+			SUB AX,PADDLE_RIGHT_Y
+			CMP AX,PADDLE_HEIGHT              ; if (Dx-PADDLE_RIGHT_Y)>PADDLE_HEIGHT , break ; else continue to the next row
+			JNG DRAW_PADDLE_RIGHT_SIZE        ; Jump if Not Greater (not >).
+			MOV DX,PADDLE_RIGHT_Y             ; Dx return to the initial
 		RET
 	DRAW_PADDLE ENDP
 			
