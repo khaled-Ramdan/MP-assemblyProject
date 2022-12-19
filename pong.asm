@@ -298,6 +298,59 @@ CODE SEGMENT PARA 'CODE'
 				JMP CHECK_RIGHT_PALLLE_MOVEMENT
 
 
+		;;;;;;; Right PADDLE  ;;;;;;;
+		CHECK_RIGHT_PALLLE_MOVEMENT :
+		
+			; if it is 'S' or 's' , move up 
+			CMP AL,53H                                         ; 'S' = 53
+			JE MOVE_RIGHT_PADDLE_UP                            ; jump if equal
+			CMP AL,73H                                         ; 's' = 73
+			JE MOVE_RIGHT_PADDLE_UP                            ; jump if equal
+			; if it is 'D' or 'd' , move down
+			CMP AL,44H                                         ; 'D' = 44
+			JE MOVE_RIGHT_PADDLE_DOWN                          ; jump if equal
+			CMP AL,64H                                         ; 'd' = 64
+			JE MOVE_RIGHT_PADDLE_DOWN                          ; jump if equal
+			;; after check jump to check the LEFT paddle too ;;
+			JMP EXIT_PADDLE_MOVEMENT
+			
+			
+			;;;;;;; MOVE_RIGHT_PADDLE_UP ;;;;;;;
+			MOVE_RIGHT_PADDLE_UP :
+				
+				MOV AX,PADDLE_VELOCITY
+				SUB PADDLE_RIGHT_Y,AX	
+				MOV AX,PADDLE_RIGHT_Y
+				CMP AX,WINDOW_BOUNDS                             ; check if the paddle is out the boundaries
+				JL  FIX_PADDLE_RIGHT_POSITION_UP                 ; if out, jump to fix
+				JMP EXIT_PADDLE_MOVEMENT                 
+				
+				FIX_PADDLE_RIGHT_POSITION_UP:
+					MOV AX,WINDOW_BOUNDS
+					MOV PADDLE_RIGHT_Y,AX                        ; put the paddle after WINDOW_BOUNDS  stay at the start of window
+					JMP EXIT_PADDLE_MOVEMENT
+			
+			;;;;;;; MOVE_RIGHT_PADDLE_DOWN ;;;;;;;
+			MOVE_RIGHT_PADDLE_DOWN :
+				
+				MOV AX,PADDLE_VELOCITY
+				ADD PADDLE_RIGHT_Y,AX	                        ; add the movement step to the paddle
+				MOV AX,WINDOW_HEIGHT							; AX = WINDOW_HEIGHT
+				SUB AX,WINDOW_BOUNDS							; AX = WINDOW_HEIGHT - WINDOW_BOUNDS
+				SUB AX,PADDLE_HEIGHT							; AX = WINDOW_HEIGHT - WINDOW_BOUNDS - PADDLE_HEIGHT
+				CMP PADDLE_RIGHT_Y,AX							; IF PADDLE_RIGHT_Y > AX " out from the window "
+				JG  FIX_PADDLE_RIGHT_POSITION_DOWN				; jump if greater
+				JMP EXIT_PADDLE_MOVEMENT
+			
+			
+				FIX_PADDLE_RIGHT_POSITION_DOWN:
+					MOV PADDLE_RIGHT_Y,AX                        ; stay at the end of window
+					JMP EXIT_PADDLE_MOVEMENT
+			
+			
+			EXIT_PADDLE_MOVEMENT:
+				RET
+
 
 		RET
 	MOVE_PADDLES ENDP
