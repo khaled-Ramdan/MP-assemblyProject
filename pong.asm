@@ -182,7 +182,7 @@ CODE SEGMENT PARA 'CODE'
 		MOV CX,PADDLE_LEFT_X                  ; set the (x) position
 		MOV DX,PADDLE_LEFT_Y                  ; set the (Y) position
 		
-		DRAW_PADDLE_LEFT_SIZE:                    ; loop to draw the horizontal pixels of the PADDLE
+		DRAW_PADDLE_LEFT_SIZE:                    ; loop to draw the pixels of the PADDLE
 		
 			MOV AH,0CH      		  ; set the configuration to write pixel
 			MOV AL,0FH                        ; white color
@@ -212,7 +212,7 @@ CODE SEGMENT PARA 'CODE'
 		MOV CX,PADDLE_RIGHT_X                 ; set the (x) position
 		MOV DX,PADDLE_RIGHT_Y                 ; set the (Y) position
 		
-		DRAW_PADDLE_RIGHT_SIZE:                   ; loop to draw the horizontal pixels of the PADDLE
+		DRAW_PADDLE_RIGHT_SIZE:                   ; loop to draw the pixels of the PADDLE
 		
 			MOV AH,0CH      		  ; set the configuration to write pixel
 			MOV AL,0FH                        ; white color
@@ -238,6 +238,69 @@ CODE SEGMENT PARA 'CODE'
 			MOV DX,PADDLE_RIGHT_Y             ; Dx return to the initial
 		RET
 	DRAW_PADDLE ENDP
+	
+	
+	MOVE_PADDLES PROC NEAR                   
+	
+		;;;;;;; LEFT PADDLE  ;;;;;;;
+		;;; check if any key is pressed and if not check the right paddle ;;;
+		MOV AH,01H				          ; ZF = 0 if a key pressed
+		INT 16H                                           ; execute int 16H for keyboard
+		JZ CHECK_RIGHT_PALLLE_MOVEMENT                    ; if ZF = 1 "no key is preesed" go to check right paddle
+
+		;;; check which key is being preesed  ;;;
+		MOV AH, 00H										  ; AL = ASCII OF key
+		INT 16H											  ; execute int 16H for keyboard
+		; if it is 'K' or 'k' , move up 
+		CMP AL,4BH                                         ; 'K' = 4B
+		JE MOVE_LEFT_PADDLE_UP                             ; jump if equal
+		CMP AL,6BH                                         ; 'k' = 6B
+		JE MOVE_LEFT_PADDLE_UP                             ; jump if equal
+		; if it is 'L' or 'l' , move down
+		CMP AL,4CH                                         ; 'L' = 4C
+		JE MOVE_LEFT_PADDLE_DOWN                           ; jump if equal
+		CMP AL,6CH                                         ; 'l' = 6C
+		JE MOVE_LEFT_PADDLE_DOWN                           ; jump if equal
+		;; after check jump to check the right paddle too ;;
+		JMP CHECK_RIGHT_PALLLE_MOVEMENT
+
+
+		;;;;;;; MOVE_LEFT_PADDLE_UP ;;;;;;;
+		MOVE_LEFT_PADDLE_UP :
+
+			MOV AX,PADDLE_VELOCITY
+			SUB PADDLE_LEFT_Y,AX	
+			MOV AX,PADDLE_LEFT_Y
+			CMP AX,WINDOW_BOUNDS                            ; check if the paddle is out the boundaries
+			JL  FIX_PADDLE_LEFT_POSITION_UP                 ; if out, jump to fix
+			JMP CHECK_RIGHT_PALLLE_MOVEMENT                 ; incase of more than one key is pressed
+
+			FIX_PADDLE_LEFT_POSITION_UP:
+				MOV AX,WINDOW_BOUNDS
+				MOV PADDLE_LEFT_Y,AX                        ; put the paddle after WINDOW_BOUNDS  stay at the start of window
+				JMP CHECK_RIGHT_PALLLE_MOVEMENT
+
+		;;;;;;; MOVE_LEFT_PADDLE_DOWN ;;;;;;;
+		MOVE_LEFT_PADDLE_DOWN :
+
+			MOV AX,PADDLE_VELOCITY
+			ADD PADDLE_LEFT_Y,AX	                        ; add the movement step to the paddle
+			MOV AX,WINDOW_HEIGHT							; AX = WINDOW_HEIGHT
+			SUB AX,WINDOW_BOUNDS							; AX = WINDOW_HEIGHT - WINDOW_BOUNDS
+			SUB AX,PADDLE_HEIGHT							; AX = WINDOW_HEIGHT - WINDOW_BOUNDS - PADDLE_HEIGHT
+			CMP PADDLE_LEFT_Y,AX							; IF PADDLE_LEFT_Y > AX " out from the window "
+			JG  FIX_PADDLE_LEFT_POSITION_DOWN				; jump if greater
+			JMP CHECK_RIGHT_PALLLE_MOVEMENT                 ; incase of more than one key is pressed
+
+
+			FIX_PADDLE_LEFT_POSITION_DOWN:
+				MOV PADDLE_LEFT_Y,AX                        ; stay at the end of window
+				JMP CHECK_RIGHT_PALLLE_MOVEMENT
+
+
+
+		RET
+	MOVE_PADDLES ENDP
 			
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  END PADDLE   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
