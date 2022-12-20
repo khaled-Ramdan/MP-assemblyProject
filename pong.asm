@@ -391,7 +391,62 @@ CODE SEGMENT PARA 'CODE'
 	MOVE_PADDLES ENDP
 			
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  END PADDLE   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+	DRAW_UI PROC NEAR
+		
+;       Draw the points of the left player (player one)
+		
+		MOV AH,02h                       ;set cursor position
+		MOV BH,00h                       ;set page number
+		MOV DH,04h                       ;set row 
+		MOV DL,06h						 ;set column
+		INT 10h							 
+		
+		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
+		LEA DX,TEXT_PLAYER_ONE_POINTS    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
+		INT 21h                          ;print the string 
+		
+;       Draw the points of the right player (player two)
+		
+		MOV AH,02h                       ;set cursor position
+		MOV BH,00h                       ;set page number
+		MOV DH,04h                       ;set row 
+		MOV DL,1Fh						 ;set column
+		INT 10h							 
+		
+		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
+		LEA DX,TEXT_PLAYER_TWO_POINTS    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
+		INT 21h                          ;print the string 
+		
+		RET
+	DRAW_UI ENDP
+	
+	UPDATE_TEXT_PLAYER_ONE_POINTS PROC NEAR
+		
+		XOR AX,AX
+		MOV AL,PLAYER_ONE_POINTS ;given, for example that P1 -> 2 points => AL,2
+		
+		;now, before printing to the screen, we need to convert the decimal value to the ascii code character 
+		;we can do this by adding 30h (number to ASCII)
+		;and by subtracting 30h (ASCII to number)
+		ADD AL,30h                       ;AL,'2'
+		MOV [TEXT_PLAYER_ONE_POINTS],AL
+		
+		RET
+	UPDATE_TEXT_PLAYER_ONE_POINTS ENDP
+	
+	UPDATE_TEXT_PLAYER_TWO_POINTS PROC NEAR
+		
+		XOR AX,AX
+		MOV AL,PLAYER_TWO_POINTS ;given, for example that P2 -> 2 points => AL,2
+		
+		;now, before printing to the screen, we need to convert the decimal value to the ascii code character 
+		;we can do this by adding 30h (number to ASCII)
+		;and by subtracting 30h (ASCII to number)
+		ADD AL,30h                       ;AL,'2'
+		MOV [TEXT_PLAYER_TWO_POINTS],AL
+		
+		RET
+	UPDATE_TEXT_PLAYER_TWO_POINTS ENDP
 			
 			
 			
