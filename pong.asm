@@ -198,13 +198,17 @@ CODE SEGMENT PARA 'CODE'
 		RET
 	DRAW_BALL ENDP
 	;..............................RESET BALL....................
-	RESET_BALL_POSITION PROC NEAR
+	RESET_BALL_POSITION PROC NEAR        ;restart ball position to the original position
+		
 		MOV AX,BALL_ORIGINAL_X
 		MOV BALL_X,AX
 		
 		MOV AX,BALL_ORIGINAL_Y
 		MOV BALL_Y,AX
-	
+		
+		NEG BALL_VELOCITY_X
+		NEG BALL_VELOCITY_Y
+		
 		RET
 	RESET_BALL_POSITION ENDP
 	
