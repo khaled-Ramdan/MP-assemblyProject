@@ -72,7 +72,9 @@ CODE SEGMENT PARA 'CODE'
 			CALL MOVE_BALL; moving the ball procedure
 			CALL DRAW_BALL; draw ball
 			
+			CALL MOVE_PADDLES   ; move paddles with keyboard
 			CALL DRAW_PADDLE    ; set the size of paddle
+			
 			CALL DRAW_UI                 ;draw the game User Interface
 			JMP  CHECK_TIME ; after everything checks => check time again
 			
