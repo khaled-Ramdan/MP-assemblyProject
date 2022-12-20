@@ -24,6 +24,9 @@ DATA SEGMENT PARA 'DATA'
 	
 	TEXT_PLAYER_ONE_POINTS DB '0','$'    ;text with the player one points
 	TEXT_PLAYER_TWO_POINTS DB '0','$'    ;text with the player two points
+	TEXT_GAME_OVER_TITLE DB   'GAME OVER' ,'$' ;text with the game over menu
+	TEXT_GAME_OVER_WINNER DB 'Player 0 won', '$' ; text with the winner text
+	TEXT_GAME_OVER_PLAY_AGAIN DB 'press R key to play again' , '$' ;text with the play again message
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   start paddle   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
 	;; Left Paddle ;;
@@ -60,7 +63,12 @@ CODE SEGMENT PARA 'CODE'
 	
 	
 		CALL CLEAR_SCREAN
+		
 		CHECK_TIME:
+		
+		    CMP GAME_ACTIVE,00h
+			JE  SHOW_GAME_OVER
+			
 			MOV AH,2Ch;get the system time 
 			INT 21h ; CH = hour CL = minute DH = second DL = 1/100 second
 			
@@ -72,11 +80,14 @@ CODE SEGMENT PARA 'CODE'
 			CALL MOVE_BALL; moving the ball procedure
 			CALL DRAW_BALL; draw ball
 			
-			CALL MOVE_PADDLES   ; move paddles with keyboard
 			CALL DRAW_PADDLE    ; set the size of paddle
-			
 			CALL DRAW_UI                 ;draw the game User Interface
 			JMP  CHECK_TIME ; after everything checks => check time again
+			
+			SHOW_GAME_OVER:
+			    CALL DRAW_GAME_OVER_MENU
+				JMP CHECK_TIME
+			
 			
 
 		RET
@@ -122,11 +133,24 @@ CODE SEGMENT PARA 'CODE'
 			JGE GAME_OVER                ;if this player points is 5 or more, the game is over
 			RET
 		
-		GAME_OVER:                       ;someone has reached 5 points
+		GAME_OVER:  		;someone has reached 5 points
+		    CMP PLAYER_ONE_POINTS,05h       ;check which player has 5 or more point
+            JNL WINNER_IS_PLAYER_ONE        ;if player one has not less than 5 points is the winner
+		    JMP WINNER_IS_PLAYER_TWO        ;if not then player two is the winner
+				
+			WINNER_IS_PLAYER_ONE:
+				MOV WINNER_INDEX,01h        ; update the winner index with the player one index
+			    JMP CONTINUE_GAME_OVER
+			WINNER_IS_PLAYER_TWO:
+				MOV WINNER_INDEX,02h         ; update the winner index with the player two index
+				JMP CONTINUE_GAME_OVER	
+					
+			CONTINUE_GAME_OVER:
 				MOV PLAYER_ONE_POINTS,00h   ;restart player one points
 				MOV PLAYER_TWO_POINTS,00h  ;restart player two points
 				CALL UPDATE_TEXT_PLAYER_ONE_POINTS
 				CALL UPDATE_TEXT_PLAYER_TWO_POINTS
+				Mov GAME_ACTIVE,00h               ;stops the game 
 				RET	
 		MOVE_BALL_VERTICALLY:
 	;move the ball vertically
@@ -154,6 +178,69 @@ CODE SEGMENT PARA 'CODE'
 			RET
 	MOVE_BALL ENDP
 	
+	DRAW_GAME_OVER_MENU PROC NEAR           ; draw the game over menu
+	    
+	    CALL CLEAR_SCREAN                   ;clear the screen before displaying the menu
+		
+;       shows the menu title
+		MOV AH,02h          ;set cursor position
+		MOV BH,00h          ;set page number
+		MOV DH,04h          ;set row
+		MOV DL,04h          ;set column
+		INT 10h
+	    
+		MOV AH,09h                       ; write string to standard output
+		LEA DX,TEXT_GAME_OVER_TITLE      ;give DX a pointer to the string TEXT_GAME_OVER_TITLE 
+		INT 21h                          ;print the string
+
+;       shows the winner
+        MOV AH,02h          ;set cursor position
+		MOV BH,00h          ;set page number
+		MOV DH,06h          ;set row
+		MOV DL,04h          ;set column
+		INT 10h
+	    
+		CALL UPDATE_WINNER_TEXT
+		
+		MOV AH,09h                       ; write string to standard output
+		LEA DX,TEXT_GAME_OVER_WINNER     ;give DX a pointer to the string TEXT_GAME_OVER_WINNER 
+		INT 21h                          ;print the string
+		
+;       shows the play again message
+        MOV AH,02h          ;set cursor position
+		MOV BH,00h          ;set page number
+		MOV DH,08h          ;set row
+		MOV DL,04h          ;set column
+		INT 10h
+	    
+				
+		MOV AH,09h                       ; write string to standard output
+		LEA DX,TEXT_GAME_OVER_PLAY_AGAIN    ;give DX a pointer to the string TEXT_GAME_OVER_PLAY_AGAIN 
+		INT 21h                          ;print the string
+		
+;       waits for a key presse
+        MOV AH,00h
+		INT 16h
+;       if press R or r restart game 		
+		CMP AL,'R'
+		JE RESTART_GAME
+		CMP AL,'r'
+		JE RESTART_GAME
+		RET
+		
+		RESTART_GAME:
+		    MOV GAME_ACTIVE,01h
+            RET
+	DRAW_GAME_OVER_MENU ENDP
+	
+	UPDATE_WINNER_TEXT PROC NEAR
+	    
+		MOV AL,WINNER_INDEX                         ;if winner index is 1=> AL,1
+		ADD AL,30h                                  ;AL,31h=>AL,'1'
+	    MOV [TEXT_GAME_OVER_WINNER+7],AL  ;update the index in the text with the character
+	
+	    RET
+	UPDATE_WINNER_TEXT ENDP
 	
 	;....................................CLEAR SCREAN................
 	CLEAR_SCREAN PROC NEAR
