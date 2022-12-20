@@ -10,7 +10,9 @@ DATA SEGMENT PARA 'DATA'
 	
 	TIME_AUX DB 0; variable used when checking if the time has changed
 	GAME_ACTIVE DB 1                     ;is the game active? (1 -> Yes, 0 -> No (game over))
+	EXITING_GAME DB 0
 	WINNER_INDEX DB 0                    ;the index of the winner (1 -> player one, 2 -> player two)
+	CURRENT_SCENE DB 0                   ; the index of the current scene(0->main menu , 1-> game)
 	
 	BALL_ORIGINAL_X DW 0A0h
 	BALL_ORIGINAL_Y DW 64h
@@ -27,6 +29,11 @@ DATA SEGMENT PARA 'DATA'
 	TEXT_GAME_OVER_TITLE DB   'GAME OVER' ,'$' ;text with the game over menu
 	TEXT_GAME_OVER_WINNER DB 'Player 0 won', '$' ; text with the winner text
 	TEXT_GAME_OVER_PLAY_AGAIN DB 'press R key to play again' , '$' ;text with the play again message
+	TEXT_GAME_OVER_MAIN_MENU DB 'press E to exit to main menu' , '$' ;text with the game over menu message 
+	TEXT_MAIN_MENU_TITLE DB   'MAIN MENU' ,'$' ;text with the main menu
+	TEXT_MAIN_MENU_SINGLEPLAYER DB 'SINGLEPLAYER -S KEY','$' ;text with the single player message
+	TEXT_MAIN_MENU_MULTIPLAYER DB 'MULTIPLAYER -M KEY','$' ;text with the multiplayer message
+	TEXT_MAIN_MENU_EXIT DB 'EXIT GAME -E KEY' ,'$' ; text with exit game message
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   start paddle   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
 	;; Left Paddle ;;
@@ -66,6 +73,12 @@ CODE SEGMENT PARA 'CODE'
 		
 		CHECK_TIME:
 		
+		    CMP EXITING_GAME,01h
+			JE START_EXIT_PROCESS
+		
+		    CMP CURRENT_SCENE,00h
+			JE SHOW_MAIN_MENU
+			
 		    CMP GAME_ACTIVE,00h
 			JE  SHOW_GAME_OVER
 			
@@ -81,19 +94,22 @@ CODE SEGMENT PARA 'CODE'
 			CALL DRAW_BALL; draw ball
 			
 			CALL DRAW_PADDLE    ; set the size of paddle
-			CALL MOVE_PADDLES   ; move the paddles using keyboard
-
-			
 			CALL DRAW_UI                 ;draw the game User Interface
 			JMP  CHECK_TIME ; after everything checks => check time again
 			
 			SHOW_GAME_OVER:
 			    CALL DRAW_GAME_OVER_MENU
 				JMP CHECK_TIME
+               
 			
+            SHOW_MAIN_MENU:
+			    CALL DRAW_MAIN_MENU
+				JMP CHECK_TIME
+		    
+			START_EXIT_PROCESS:
+			    CALL CONCLUDE_EXIT_GAME
 			
-
-		RET
+		RET		
 	MAIN ENDP
 	
 	;...................................MOVE BALL..................
@@ -154,12 +170,11 @@ CODE SEGMENT PARA 'CODE'
 				CALL UPDATE_TEXT_PLAYER_ONE_POINTS
 				CALL UPDATE_TEXT_PLAYER_TWO_POINTS
 				Mov GAME_ACTIVE,00h               ;stops the game 
-				RET
-				
+				RET	
 		MOVE_BALL_VERTICALLY:
 	;move the ball vertically
-			MOV AX,BALL_VELOCITY_Y 
-			ADD BALL_Y, AX
+		MOV AX,BALL_VELOCITY_Y 
+		ADD BALL_Y, AX
 		
 		;ball y < 0 (x=>collided)
 		MOV AX,WINDOW_BOUNDS
@@ -172,99 +187,15 @@ CODE SEGMENT PARA 'CODE'
 		CMP BALL_Y,AX
 		JG NEG_VELOCITY_Y
 		
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; start COLLISION paddles with ball ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-		;;;;;;   check if the ball is colliding with the right paddle   ;;;;;;
-		;;; maxx1 > minx2 && minx1 < maxx2 && maxy1 > miny1 && miny1 < maxy2   ;;;
-		;; maxx1 = BALL_X + BALL_SIZE   ;; minx2 = PADDLE_RIGHT_X  ;;;;;;;  minx1 = BALL_X ;; maxx2 =  PADDLE_RIGHT_X + PADDLE_WIDTH ;;
-		;; maxy1 = BALL_Y + BALL_SIZE   ;; miny1 = PADDLE_RIGHT_Y  ;;;;;;;  miny1 = BALL_Y ;; maxy2 =  PADDLE_RIGHT_Y + PADDLE_HEIGHT ;;
-		
-		
-		;; if  ( BALL_X + BALL_SIZE ) > PADDLE_RIGHT_X
-		MOV AX,BALL_X
-		ADD AX,BALL_SIZE
-		CMP AX,PADDLE_RIGHT_X								 
-		JNG CHECK_COLLISION_WITH_LEFT_PADDLE                ; if there is no collision ,check for the left collision
-		
-		;; if  ( PADDLE_RIGHT_X + PADDLE_WIDTH ) > BALL_X
-		MOV AX,PADDLE_RIGHT_X
-		ADD AX,PADDLE_WIDTH
-		CMP BALL_X,AX								 
-		JNL CHECK_COLLISION_WITH_LEFT_PADDLE                ; if there is no collision ,check for the left collision
-		
-		
-		;; if  ( BALL_Y + BALL_SIZE ) > PADDLE_RIGHT_Y  
-		MOV AX,BALL_Y
-		ADD AX,BALL_SIZE
-		CMP AX,PADDLE_RIGHT_Y								 
-		JNG CHECK_COLLISION_WITH_LEFT_PADDLE                ; if there is no collision ,check for the left collision
-		
-
-		
-		;; if  ( PADDLE_RIGHT_Y + PADDLE_HEIGHT ) > BALL_Y
-		MOV AX,PADDLE_RIGHT_Y
-		ADD AX,PADDLE_HEIGHT
-		CMP BALL_Y,AX								 
-		JNL CHECK_COLLISION_WITH_LEFT_PADDLE                ; if there is no collision ,check for the left collision
-		
-		; if it reaches here, all conditions are true  , there is a collision
-		JMP NEG_VELOCITY_X
-		
-		
-		;;;;;;   check if the ball is colliding with the left paddle   ;;;;;;
-		
-		CHECK_COLLISION_WITH_LEFT_PADDLE :
-		;;; maxx1 > minx2 && minx1 < maxx2 && maxy1 > miny1 && miny1 < maxy2   ;;;
-		;; maxx1 = BALL_X + BALL_SIZE   ;; minx2 = PADDLE_LEFT_X  ;;;;;;;  minx1 = BALL_X ;; maxx2 =  PADDLE_LEFT_X + PADDLE_WIDTH ;;
-		;; maxy1 = BALL_Y + BALL_SIZE   ;; miny1 = PADDLE_LEFT_Y  ;;;;;;;  miny1 = BALL_Y ;; maxy2 =  PADDLE_LEFT_Y + PADDLE_HEIGHT ;;
-		
-		;; if  ( BALL_X + BALL_SIZE ) > PADDLE_LEFT_X
-		MOV AX,BALL_X
-		ADD AX,BALL_SIZE
-		CMP AX,PADDLE_LEFT_X								 
-		JNG EXIT_COLLISION_CHECK                            ; if there is no collision , exit from fun
-		
-		;; if  ( PADDLE_LEFT_X + PADDLE_WIDTH ) > BALL_X
-		MOV AX,PADDLE_LEFT_X
-		ADD AX,PADDLE_WIDTH
-		CMP BALL_X,AX								 
-		JNL EXIT_COLLISION_CHECK                            ; if there is no collision , exit from fun
-		
-		
-		;; if  ( BALL_Y + BALL_SIZE ) > PADDLE_LEFT_Y  
-		MOV AX,BALL_Y
-		ADD AX,BALL_SIZE
-		CMP AX,PADDLE_LEFT_Y								 
-		JNG EXIT_COLLISION_CHECK                            ; if there is no collision , exit from fun
-		
-
-		
-		;; if  ( PADDLE_LEFT_Y + PADDLE_HEIGHT ) > BALL_Y
-		MOV AX,PADDLE_LEFT_Y
-		ADD AX,PADDLE_HEIGHT
-		CMP BALL_Y,AX								 
-		JNL EXIT_COLLISION_CHECK                            ; if there is no collision , exit from fun
-		
-		
-		; if it reaches here, all conditions are true  , there is a collision
-		JMP NEG_VELOCITY_X
-		
+		RET
 		;.......negate velocity
-		
+		RESET_POSITOIN:
+			CALL RESET_BALL_POSITION ; BALL_VELOCITY_X = -BALL_VELOCITY_X
+			RET
 		NEG_VELOCITY_Y:
 			NEG BALL_VELOCITY_Y ; BALL_VELOCITY_Y = -BALL_VELOCITY_Y
 			RET
-			
-		NEG_VELOCITY_X:
-			NEG BALL_VELOCITY_X                                 ; reverse the ball velocity horizontal
-			RET   
-		
-		EXIT_COLLISION_CHECK :
-			RET
-		
-			
 	MOVE_BALL ENDP
-	
 	
 	DRAW_GAME_OVER_MENU PROC NEAR           ; draw the game over menu
 	    
@@ -306,6 +237,18 @@ CODE SEGMENT PARA 'CODE'
 		LEA DX,TEXT_GAME_OVER_PLAY_AGAIN    ;give DX a pointer to the string TEXT_GAME_OVER_PLAY_AGAIN 
 		INT 21h                          ;print the string
 		
+;		shows the main menu message
+        MOV AH,02h          ;set cursor position
+		MOV BH,00h          ;set page number
+		MOV DH,0Ah          ;set row
+		MOV DL,04h          ;set column
+		INT 10h
+	    
+				
+		MOV AH,09h                       ; write string to standard output
+		LEA DX,TEXT_GAME_OVER_MAIN_MENU    ;give DX a pointer to the string TEXT_GAME_OVER_PLAY_AGAIN 
+		INT 21h                          ;print the string
+		
 ;       waits for a key presse
         MOV AH,00h
 		INT 16h
@@ -314,12 +257,107 @@ CODE SEGMENT PARA 'CODE'
 		JE RESTART_GAME
 		CMP AL,'r'
 		JE RESTART_GAME
+;		if press E or e exit to main menu
+		CMP AL,'E'
+		JE EXIT_TO_MAIN_MENU
+		CMP AL,'e'
+		JE EXIT_TO_MAIN_MENU
 		RET
 		
 		RESTART_GAME:
 		    MOV GAME_ACTIVE,01h
             RET
+			
+		EXIT_TO_MAIN_MENU:
+            MOV GAME_ACTIVE,00h
+			MOV CURRENT_SCENE,00h 
+			RET
+			
+		
 	DRAW_GAME_OVER_MENU ENDP
+	
+	DRAW_MAIN_MENU PROC NEAR 
+	
+	  CALL CLEAR_SCREAN 
+;	    shows the menu title
+		MOV AH,02h          ;set cursor position
+		MOV BH,00h          ;set page number
+		MOV DH,04h          ;set row
+		MOV DL,04h          ;set column
+		INT 10h
+	    
+		MOV AH,09h                       ; write string to standard output
+		LEA DX,TEXT_MAIN_MENU_TITLE      ;give DX a pointer to the string TEXT_GAME_OVER_TITLE 
+		INT 21h                          ;print the string
+		 
+;		show the singleplayer message
+        MOV AH,02h          ;set cursor position
+		MOV BH,00h          ;set page number
+		MOV DH,06h          ;set row
+		MOV DL,04h          ;set column
+		INT 10h
+	    
+		MOV AH,09h                       ; write string to standard output
+		LEA DX,TEXT_MAIN_MENU_SINGLEPLAYER     ;give DX a pointer to the string TEXT_GAME_OVER_TITLE 
+		INT 21h                          ;print the string
+		
+;		show the multiplayer message
+        MOV AH,02h          ;set cursor position
+		MOV BH,00h          ;set page number
+		MOV DH,08h          ;set row
+		MOV DL,04h          ;set column
+		INT 10h
+	    
+		MOV AH,09h                       ; write string to standard output
+		LEA DX,TEXT_MAIN_MENU_MULTIPLAYER     ;give DX a pointer to the string TEXT_GAME_OVER_TITLE 
+		INT 21h                          ;print the string
+		
+;		show the exit  message
+        MOV AH,02h          ;set cursor position
+		MOV BH,00h          ;set page number
+		MOV DH,0Ah          ;set row
+		MOV DL,04h          ;set column
+		INT 10h
+	    
+		MOV AH,09h                       ; write string to standard output
+		LEA DX,TEXT_MAIN_MENU_EXIT      ;give DX a pointer to the string TEXT_GAME_OVER_TITLE 
+		INT 21h                          ;print the string
+		
+		MAIN_MENU_WAIT_FOR_KEY:
+		
+;       waits for a key presse
+            MOV AH,00h
+		    INT 16h
+		 
+;       check which key was pressed
+	        CMP AL,'S'
+		    JE START_SINGLEPLAYER
+		    CMP AL,'s'
+		    JE START_SINGLEPLAYER
+		    CMP AL,'M'
+		    JE START_MULTIPLAYER
+		    CMP AL,'m'
+		    JE START_MULTIPLAYER
+		    CMP AL,'E'
+		    JE EXIT_GAME
+		    CMP AL,'e'
+		    JE EXIT_GAME
+			JMP MAIN_MENU_WAIT_FOR_KEY
+			
+		START_SINGLEPLAYER:
+            
+            MOV GAME_ACTIVE	, 01h
+			RET
+		START_MULTIPLAYER:
+		    MOV CURRENT_SCENE,01h
+		    MOV GAME_ACTIVE,01h
+            RET
+		
+        EXIT_GAME:
+            MOV EXITING_GAME,01h
+            RET	
+			
+	DRAW_MAIN_MENU ENDP
 	
 	UPDATE_WINNER_TEXT PROC NEAR
 	    
@@ -345,6 +383,18 @@ CODE SEGMENT PARA 'CODE'
 		RET
 	CLEAR_SCREAN ENDP
 	
+	CONCLUDE_EXIT_GAME PROC NEAR  ; goes back to the text mode
+	
+	    MOV AH,00h              ;set the configuration to vedio mode
+		MOV AL,02h              ;choose the vedio mode
+		INT 10h	                ;execute the configuration 
+	
+	    MOV AH,4Ch              ;terminate the program
+		INT 21h
+		
+		
+	    RET
+	CONCLUDE_EXIT_GAME ENDP
 	
 	;...................................DRAW BALL..................
 	DRAW_BALL PROC NEAR                  
@@ -633,4 +683,3 @@ CODE SEGMENT PARA 'CODE'
 			
 CODE ENDS
 END
-
