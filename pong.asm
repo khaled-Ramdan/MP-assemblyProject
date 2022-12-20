@@ -171,7 +171,9 @@ CODE SEGMENT PARA 'CODE'
 		SUB AX,WINDOW_BOUNDS
 		CMP BALL_Y,AX
 		JG NEG_VELOCITY_Y
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; start COLLISION paddles with ball ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; start COLLISION paddles with ball ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 		;;;;;;   check if the ball is colliding with the right paddle   ;;;;;;
 		;;; maxx1 > minx2 && minx1 < maxx2 && maxy1 > miny1 && miny1 < maxy2   ;;;
 		;; maxx1 = BALL_X + BALL_SIZE   ;; minx2 = PADDLE_RIGHT_X  ;;;;;;;  minx1 = BALL_X ;; maxx2 =  PADDLE_RIGHT_X + PADDLE_WIDTH ;;
@@ -206,6 +208,43 @@ CODE SEGMENT PARA 'CODE'
 		JNL CHECK_COLLISION_WITH_LEFT_PADDLE                ; if there is no collision ,check for the left collision
 		
 		
+		;;;;;;   check if the ball is colliding with the left paddle   ;;;;;;
+		
+		CHECK_COLLISION_WITH_LEFT_PADDLE :
+		;;; maxx1 > minx2 && minx1 < maxx2 && maxy1 > miny1 && miny1 < maxy2   ;;;
+		;; maxx1 = BALL_X + BALL_SIZE   ;; minx2 = PADDLE_LEFT_X  ;;;;;;;  minx1 = BALL_X ;; maxx2 =  PADDLE_LEFT_X + PADDLE_WIDTH ;;
+		;; maxy1 = BALL_Y + BALL_SIZE   ;; miny1 = PADDLE_LEFT_Y  ;;;;;;;  miny1 = BALL_Y ;; maxy2 =  PADDLE_LEFT_Y + PADDLE_HEIGHT ;;
+		
+		;; if  ( BALL_X + BALL_SIZE ) > PADDLE_LEFT_X
+		MOV AX,BALL_X
+		ADD AX,BALL_SIZE
+		CMP AX,PADDLE_LEFT_X								 
+		JNG EXIT_COLLISION_CHECK                            ; if there is no collision , exit from fun
+		
+		;; if  ( PADDLE_LEFT_X + PADDLE_WIDTH ) > BALL_X
+		MOV AX,PADDLE_LEFT_X
+		ADD AX,PADDLE_WIDTH
+		CMP BALL_X,AX								 
+		JNL EXIT_COLLISION_CHECK                            ; if there is no collision , exit from fun
+		
+		
+		;; if  ( BALL_Y + BALL_SIZE ) > PADDLE_LEFT_Y  
+		MOV AX,BALL_Y
+		ADD AX,BALL_SIZE
+		CMP AX,PADDLE_LEFT_Y								 
+		JNG EXIT_COLLISION_CHECK                            ; if there is no collision , exit from fun
+		
+
+		
+		;; if  ( PADDLE_LEFT_Y + PADDLE_HEIGHT ) > BALL_Y
+		MOV AX,PADDLE_LEFT_Y
+		ADD AX,PADDLE_HEIGHT
+		CMP BALL_Y,AX								 
+		JNL EXIT_COLLISION_CHECK                            ; if there is no collision , exit from fun
+		
+		
+		; if it reaches here, all conditions are true  , there is a collision
+		JMP NEG_VELOCITY_X
 		; if it reaches here, all conditions are true  , there is a collision
 		JMP NEG_VELOCITY_X
 		;.......negate velocity
