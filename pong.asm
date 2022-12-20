@@ -9,6 +9,8 @@ DATA SEGMENT PARA 'DATA'
 	WINDOW_BOUNDS DW 6;variable used to check collsions eaerly
 	
 	TIME_AUX DB 0; variable used when checking if the time has changed
+	GAME_ACTIVE DB 1                     ;is the game active? (1 -> Yes, 0 -> No (game over))
+	WINNER_INDEX DB 0                    ;the index of the winner (1 -> player one, 2 -> player two)
 	
 	BALL_ORIGINAL_X DW 0A0h
 	BALL_ORIGINAL_Y DW 64h
@@ -17,17 +19,21 @@ DATA SEGMENT PARA 'DATA'
 	BALL_X DW 0A0h; x position (coloum) of the ball
 	BALL_Y DW 64h; y position (line) of the ball 
 	BALL_SIZE DW 06h;size of the ball (how many pixels does the ball have in width and height)
-	BALL_VELOCITY_X DW 02h; x velocity of the ball (horizontal)
-	BALL_VELOCITY_y DW 02h; y velocity of the ball (vertical)
+	BALL_VELOCITY_X DW 04h; x velocity of the ball (horizontal)
+	BALL_VELOCITY_y DW 04h; y velocity of the ball (vertical)
 	
+	TEXT_PLAYER_ONE_POINTS DB '0','$'    ;text with the player one points
+	TEXT_PLAYER_TWO_POINTS DB '0','$'    ;text with the player two points
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   start paddle   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
 	;; Left Paddle ;;
 	PADDLE_LEFT_X  DW 0AH                       ; position of left paddle  X
 	PADDLE_LEFT_Y  DW 0AH			    ; position of left paddle  Y
+	PLAYER_ONE_POINTS DB 0              ;current points of the left player (player one)
 	;; Right paddle ;;
 	PADDLE_RIGHT_X  DW 130H                     ; position of right paddle  X
 	PADDLE_RIGHT_Y  DW 0AH			    ; position of right paddle  Y
+	PLAYER_TWO_POINTS DB 0             ;current points of the right player (player two)
 	;; size of paddles ;;
 	PADDLE_WIDTH   DW 05H                       ; width of the paddle
 	PADDLE_HEIGHT  DW 1FH                       ; height of the paddle
@@ -67,7 +73,7 @@ CODE SEGMENT PARA 'CODE'
 			CALL DRAW_BALL; draw ball
 			
 			CALL DRAW_PADDLE    ; set the size of paddle
-
+			CALL DRAW_UI                 ;draw the game User Interface
 			JMP  CHECK_TIME ; after everything checks => check time again
 			
 
@@ -83,14 +89,15 @@ CODE SEGMENT PARA 'CODE'
 		;ball x < 0 (y => collided)
 		MOV AX,WINDOW_BOUNDS
 		CMP BALL_X,AX
-		JL RESET_POSITOIN
+		JL GIVE_POINT_TO_PLAYER_TWO
 	
 		;ball x > window_width -ball size - window bounds (y=>collided) 
 		MOV AX,WINDOW_WIDTH
 		SUB AX,BALL_SIZE
 		SUB AX,WINDOW_BOUNDS
 		CMP BALL_X,AX
-		JG RESET_POSITOIN 
+		JG GIVE_POINT_TO_PLAYER_ONE 
+		JMP MOVE_BALL_VERTICALLY
 		
 	;move the ball vertically
 		MOV AX,BALL_VELOCITY_Y 
