@@ -207,6 +207,9 @@ CODE SEGMENT PARA 'CODE'
 		CMP BALL_Y,AX								 
 		JNL CHECK_COLLISION_WITH_LEFT_PADDLE                ; if there is no collision ,check for the left collision
 		
+		; if it reaches here, all conditions are true  , there is a collision
+		JMP NEG_VELOCITY_X
+		
 		
 		;;;;;;   check if the ball is colliding with the left paddle   ;;;;;;
 		
@@ -245,15 +248,20 @@ CODE SEGMENT PARA 'CODE'
 		
 		; if it reaches here, all conditions are true  , there is a collision
 		JMP NEG_VELOCITY_X
-		; if it reaches here, all conditions are true  , there is a collision
-		JMP NEG_VELOCITY_X
+		
 		;.......negate velocity
-		RESET_POSITOIN:
-			CALL RESET_BALL_POSITION ; BALL_VELOCITY_X = -BALL_VELOCITY_X
-			RET
+		
 		NEG_VELOCITY_Y:
 			NEG BALL_VELOCITY_Y ; BALL_VELOCITY_Y = -BALL_VELOCITY_Y
 			RET
+			
+		NEG_VELOCITY_X:
+			NEG BALL_VELOCITY_X                                 ; reverse the ball velocity horizontal
+			RET   
+		
+		EXIT_COLLISION_CHECK :
+			RET
+		
 			
 	MOVE_BALL ENDP
 	
