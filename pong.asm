@@ -99,6 +99,34 @@ CODE SEGMENT PARA 'CODE'
 		JG GIVE_POINT_TO_PLAYER_ONE 
 		JMP MOVE_BALL_VERTICALLY
 		
+		GIVE_POINT_TO_PLAYER_ONE:		 ;give one point to the player one and reset ball position
+			INC PLAYER_ONE_POINTS       ;increment player one points
+			CALL RESET_BALL_POSITION     ;reset ball position to the center of the screen
+			
+			CALL UPDATE_TEXT_PLAYER_ONE_POINTS ;update the text of the player one points
+			
+			CMP PLAYER_ONE_POINTS,05h   ;check if this player has reached 5 points
+			JGE GAME_OVER                ;if this player points is 5 or more, the game is over
+			RET
+		
+		
+		GIVE_POINT_TO_PLAYER_TWO:        ;give one point to the player two and reset ball position
+			INC PLAYER_TWO_POINTS      ;increment player two points
+			CALL RESET_BALL_POSITION     ;reset ball position to the center of the screen
+			
+			CALL UPDATE_TEXT_PLAYER_TWO_POINTS ;update the text of the player two points
+			
+			CMP PLAYER_TWO_POINTS,05h  ;check if this player has reached 5 points
+			JGE GAME_OVER                ;if this player points is 5 or more, the game is over
+			RET
+		
+		GAME_OVER:                       ;someone has reached 5 points
+				MOV PLAYER_ONE_POINTS,00h   ;restart player one points
+				MOV PLAYER_TWO_POINTS,00h  ;restart player two points
+				CALL UPDATE_TEXT_PLAYER_ONE_POINTS
+				CALL UPDATE_TEXT_PLAYER_TWO_POINTS
+				RET	
+		MOVE_BALL_VERTICALLY:
 	;move the ball vertically
 		MOV AX,BALL_VELOCITY_Y 
 		ADD BALL_Y, AX
