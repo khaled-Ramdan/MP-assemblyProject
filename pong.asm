@@ -8,6 +8,7 @@ DATA SEGMENT PARA 'DATA'
 	WINDOW_HEIGHT DW  0C8h ; the height of the window (200 pixels)
 	WINDOW_BOUNDS DW 6;variable used to check collsions eaerly
 	
+	PERIOD DW 4
 	TIME_AUX DB 0; variable used when checking if the time has changed
 	GAME_ACTIVE DB 1                     ;is the game active? (1 -> Yes, 0 -> No (game over))
 	EXITING_GAME DB 0
@@ -16,6 +17,17 @@ DATA SEGMENT PARA 'DATA'
 	
 	BALL_ORIGINAL_X DW 0A0h
 	BALL_ORIGINAL_Y DW 64h
+	
+	ORIGINAL_COLOR DB 0FH
+	SECOND_COLOR DB 0CH
+	
+	VELOCITY_X_E DW 05H
+	VELOCITY_X_M DW 08H
+	VELOCITY_X_H DW 0AH
+
+	VELOCITY_Y_E DW 02H
+	VELOCITY_Y_M DW 03H
+	VELOCITY_Y_H DW 04H
 	
 	
 	BALL_X DW 0A0h; x position (coloum) of the ball
@@ -34,6 +46,13 @@ DATA SEGMENT PARA 'DATA'
 	TEXT_MAIN_MENU_SINGLEPLAYER DB 'SINGLEPLAYER -S KEY','$' ;text with the single player message
 	TEXT_MAIN_MENU_MULTIPLAYER DB 'MULTIPLAYER -M KEY','$' ;text with the multiplayer message
 	TEXT_MAIN_MENU_EXIT DB 'EXIT GAME -E KEY' ,'$' ; text with exit game message
+	TEXT_DIFF DB 'GAME DIFFICULTY', '$'
+	TEXT_DIFF_EASY DB 'EASY - E KEY', '$'
+	TEXT_DIFF_MED DB 'MEDIUM - M KEY', '$'
+	TEXT_DIFF_HARD DB 'HARD - H KEY', '$'
+	TEXT_STOP_GAME_CONTINUE DB 'CONTINUE - C KEY', '$'
+	TEXT_STOP_GAME_EXIT DB 'GO TO MAIN MENU - ESC KEY', '$'
+
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   start paddle   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
 	;; Left Paddle ;;
@@ -50,6 +69,10 @@ DATA SEGMENT PARA 'DATA'
 	;; move by this value ;;
 	PADDLE_VELOCITY DW 05H                      ; velocity of the paddle
 	
+	FLAG_PADDLE_LEFT DW 0H
+	FLAG_PADDLE_RIGHT DW 0H
+	COLOR_PADDLE_LEFT DB 0FH
+	COLOR_PADDLE_RIGHT DB 0FH
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   end paddle   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
 DATA ENDS 
@@ -93,6 +116,7 @@ CODE SEGMENT PARA 'CODE'
 			CALL MOVE_BALL; moving the ball procedure
 			CALL DRAW_BALL; draw ball
 			
+			CALL PADDLE_COLOR
 			CALL DRAW_PADDLE    ; set the size of paddle
 			CALL MOVE_PADDLES   ; move the paddles using keyboard
 			
@@ -113,6 +137,42 @@ CODE SEGMENT PARA 'CODE'
 			
 		RET		
 	MAIN ENDP
+	
+	PADDLE_COLOR PROC NEAR
+		
+		MOV AX, FLAG_PADDLE_RIGHT
+		DEC AX
+		CMP AX, 0
+		JL LESS
+		
+		JMP STORE_FLAG_PADDLE_RIGHT
+		
+		LESS:
+			MOV AL, ORIGINAL_COLOR
+			MOV COLOR_PADDLE_RIGHT, AL
+			MOV AX, 0
+
+		STORE_FLAG_PADDLE_RIGHT:
+			MOV FLAG_PADDLE_RIGHT, AX
+		
+		MOV AX, FLAG_PADDLE_LEFT
+		DEC AX
+		CMP AX, 0
+		JL LESS2
+		
+		JMP STORE_FLAG_PADDLE_LEFT
+		
+		LESS2:
+			MOV AL, ORIGINAL_COLOR
+			MOV COLOR_PADDLE_LEFT, AL
+			MOV AX, 0
+
+		STORE_FLAG_PADDLE_LEFT:
+			MOV FLAG_PADDLE_LEFT, AX
+
+		RET
+
+	PADDLE_COLOR ENDP
 	
 	;...................................MOVE BALL..................
 	MOVE_BALL PROC NEAR
@@ -181,13 +241,18 @@ CODE SEGMENT PARA 'CODE'
 		;ball y < 0 (x=>collided)
 		MOV AX,WINDOW_BOUNDS
 		CMP BALL_Y ,AX
-		JL NEG_VELOCITY_Y
+		JAE NOT_LESS
+		JMP	NEG_VELOCITY_Y		 
+		NOT_LESS:                
+
 		;BALL Y > WINDOW_HEIGHT -ball size- window bounds  (X=>collided)
 		MOV AX,WINDOW_HEIGHT
 		SUB AX,BALL_SIZE
 		SUB AX,WINDOW_BOUNDS
 		CMP BALL_Y,AX
-		JG NEG_VELOCITY_Y
+		JLE NOT_BIGGER
+		JMP	NEG_VELOCITY_Y	
+		NOT_BIGGER:   
 		
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; start COLLISION paddles with ball ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -225,6 +290,12 @@ CODE SEGMENT PARA 'CODE'
 		JNL CHECK_COLLISION_WITH_LEFT_PADDLE                ; if there is no collision ,check for the left collision
 		
 		; if it reaches here, all conditions are true  , there is a collision
+		
+		MOV AL, SECOND_COLOR
+		MOV COLOR_PADDLE_RIGHT, AL
+		MOV AX, PERIOD
+		MOV FLAG_PADDLE_RIGHT, AX		
+
 		JMP NEG_VELOCITY_X
 		
 		
@@ -264,6 +335,12 @@ CODE SEGMENT PARA 'CODE'
 		
 		
 		; if it reaches here, all conditions are true  , there is a collision
+		
+		MOV AL, SECOND_COLOR
+		MOV COLOR_PADDLE_LEFT, AL
+		MOV AX, PERIOD
+		MOV FLAG_PADDLE_LEFT, AX
+		
 		JMP NEG_VELOCITY_X
 		
 		
@@ -537,7 +614,7 @@ CODE SEGMENT PARA 'CODE'
 		DRAW_PADDLE_LEFT_SIZE:                    ; loop to draw the pixels of the PADDLE
 		
 			MOV AH,0CH      		  ; set the configuration to write pixel
-			MOV AL,0FH                        ; white color
+			MOV AL,COLOR_PADDLE_LEFT                       
 			MOV BH,00H                        
 			INT 10H
 			
@@ -567,7 +644,7 @@ CODE SEGMENT PARA 'CODE'
 		DRAW_PADDLE_RIGHT_SIZE:                   ; loop to draw the pixels of the PADDLE
 		
 			MOV AH,0CH      		  ; set the configuration to write pixel
-			MOV AL,0FH                        ; white color
+			MOV AL,COLOR_PADDLE_RIGHT                      
 			MOV BH,00H                        
 			INT 10H
 			
@@ -769,4 +846,3 @@ CODE SEGMENT PARA 'CODE'
 			
 CODE ENDS
 END
-
