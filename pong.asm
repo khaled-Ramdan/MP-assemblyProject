@@ -146,6 +146,7 @@ CODE SEGMENT PARA 'CODE'
 				
 				
 			SHOW_INFO_MENU:
+				mov INFO,01h
 			    CALL DRAW_INFO_MENU
 				JMP CHECK_TIME		
 			
@@ -671,9 +672,9 @@ CODE SEGMENT PARA 'CODE'
 		LEA DX,TEXT_NAME_PLAYER_ONE     ;give DX a pointer to the string TEXT_MAIN_MENU_TITLE 
 		INT 21h                          ;print the string
 		
-		MOV AH , 10
+		MOV AH , 0Ah
 		LEA DX,Arr1                        ; enter a string
-		MOV arr1,6
+		MOV Arr1,6
 		INT 21h
 
 		
@@ -688,9 +689,9 @@ CODE SEGMENT PARA 'CODE'
 		LEA DX,TEXT_NAME_PLAYER_TWO     ;give DX a pointer to the string TEXT_MAIN_MENU_TITLE 
 		INT 21h                          ;print the string
 		
-		MOV AH , 10
+		MOV AH , 0Ah
 		LEA DX,Arr2                        ; enter a string
-		MOV arr2,6
+		MOV Arr2,6
 		INT 21h
 		
 		
