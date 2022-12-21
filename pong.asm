@@ -14,8 +14,8 @@ DATA SEGMENT PARA 'DATA'
 	EXITING_GAME DB 0
 	WINNER_INDEX DB 0                    ;the index of the winner (1 -> player one, 2 -> player two)
 	CURRENT_SCENE DB 0                   ; the index of the current scene(0->main menu , 1-> game)
-	Arr1 DB 10 DUP (0)
-	Arr2 DB 10 DUP (0)
+	Arr1 DB 10 , 0, 10 DUP('$')
+	Arr2 DB 10 , 0, 10 DUP('$')
 	INFO  DB 0  
 	
 	BALL_ORIGINAL_X DW 0A0h
@@ -58,7 +58,7 @@ DATA SEGMENT PARA 'DATA'
 	TEXT_START_GAME_TITLE DB   'START GAME' ,'$' ;text with START GAME MESSAGE
 	TEXT_NAME_PLAYER_ONE DB 'Enter name of player one:','$' ; Enter name of player one message
 	TEXT_NAME_PLAYER_TWO DB 'Enter name of player two:','$' ; Enter name of player two message
-
+ 	wn DB 'WINS','$'
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   start paddle   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
 	;; Left Paddle ;;
@@ -505,12 +505,29 @@ CODE SEGMENT PARA 'CODE'
 		MOV DL,04h          ;set column
 		INT 10h
 	    
-		CALL UPDATE_WINNER_TEXT
-		
+		;CALL UPDATE_WINNER_TEXT
+		mov BL,01h
+		cmp WINNER_INDEX,BL
+		je ONE
 		MOV AH,09h                       ; write string to standard output
-		LEA DX,TEXT_GAME_OVER_WINNER     ;give DX a pointer to the string TEXT_GAME_OVER_WINNER 
+		LEA DX,Arr2+2     ;give DX a pointer to the string TEXT_GAME_OVER_WINNER 
+		INT 21h                          ;print the string
+		jmp ed
+		
+		ONE:
+		MOV AH,09h                       ; write string to standard output
+		LEA DX,Arr1+2     ;give DX a pointer to the string TEXT_GAME_OVER_WINNER 
 		INT 21h                          ;print the string
 		
+		ed:
+			MOV AH,02h          ;set cursor position
+			MOV BH,00h          ;set page number
+			MOV DH,06h          ;set row
+			MOV DL,0Ah          ;set column
+			INT 10h
+			MOV AH,09h                       ; write string to standard output
+			LEA DX,wn     ;give DX a pointer to the string TEXT_GAME_OVER_WINNER 
+			INT 21h                          ;print the string
 ;       shows the play again message
         MOV AH,02h          ;set cursor position
 		MOV BH,00h          ;set page number
@@ -659,7 +676,15 @@ CODE SEGMENT PARA 'CODE'
 		MOV AH,09h                       ; write string to standard output
 		LEA DX,TEXT_START_GAME_TITLE   ;give DX a pointer to the string TEXT_MAIN_MENU_TITLE 
 		INT 21h                          ;print the string
-		
+		; clear the old names
+		mov BX,0h
+		mov Al,"$"
+		CLEAR_FNAME:
+			MOV [Arr1+BX],Al  ;update the index in the text with the character
+			MOV [Arr2+BX],Al  ;update the index in the text with the character
+			inc BX
+			cmp BX,0Ah
+			jne CLEAR_FNAME
 		
 ;		show the player one name message
         MOV AH,02h          ;set cursor position
