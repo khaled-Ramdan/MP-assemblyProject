@@ -777,6 +777,66 @@ CODE SEGMENT PARA 'CODE'
 		RET
 	DRAW_PADDLE ENDP
 	
+		DRAW_STOP_GAME PROC NEAR
+
+		CALL CLEAR_SCREAN                ;clear the screen before displaying the menu
+
+		CALL DRAW_UI
+
+;       Shows the RESULTS
+		MOV AH,02h                       ;set cursor position
+		MOV BH,00h                       ;set page number
+		MOV DH,0Ah                       ;set row 
+		MOV DL,04h						 ;set column
+		INT 10h							 
+		
+		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
+		LEA DX,TEXT_STOP_GAME_CONTINUE      ;give DX a pointer 
+		INT 21h                          ;print the string
+
+;       Shows the winner
+		MOV AH,02h                       ;set cursor position
+		MOV BH,00h                       ;set page number
+		MOV DH,0Ch                       ;set row 
+		MOV DL,04h						 ;set column
+		INT 10h							 
+				
+		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
+		LEA DX, TEXT_STOP_GAME_EXIT     ;give DX a pointer 
+		INT 21h                          ;print the string
+		
+		REPEAT:
+;       Waits for a key press
+		MOV AH,00h
+		INT 16h
+
+;       If the key is either 'R' or 'r', restart the game		
+		CMP AL,'C'
+		JE CONTINUE_GAME
+		CMP AL,'c'
+		JE CONTINUE_GAME
+;       If the key is either 'E' or 'e', exit to main menu
+		CMP AL,1BH
+		JE GO_TO_MAIN_MENU
+		
+		JMP REPEAT
+		
+		CONTINUE_GAME:
+			MOV CURRENT_SCENE,01h
+			RET
+		
+		GO_TO_MAIN_MENU:
+			MOV CURRENT_SCENE,00h
+			CALL RESET_BALL_POSITION
+			MOV CURRENT_SCENE,00h
+			MOV PLAYER_ONE_POINTS,00h   ;restart player one points
+			MOV PLAYER_TWO_POINTS,00h  ;restart player two points
+			CALL UPDATE_TEXT_PLAYER_ONE_POINTS
+			CALL UPDATE_TEXT_PLAYER_TWO_POINTS
+			RET
+			
+
+	DRAW_STOP_GAME ENDP
 	
 	MOVE_PADDLES PROC NEAR                   
 	
@@ -784,7 +844,9 @@ CODE SEGMENT PARA 'CODE'
 		;;; check if any key is pressed and if not check the right paddle ;;;
 		MOV AH,01H				          ; ZF = 0 if a key pressed
 		INT 16H                                           ; execute int 16H for keyboard
-		JZ CHECK_RIGHT_PALLLE_MOVEMENT                    ; if ZF = 1 "no key is preesed" go to check right paddle
+		JNZ GO
+		JMP EXIT_PADDLE_MOVEMENT
+		GO:                
 
 		;;; check which key is being preesed  ;;;
 		MOV AH, 00H										  ; AL = ASCII OF key
@@ -850,7 +912,7 @@ CODE SEGMENT PARA 'CODE'
 			CMP AL,64H                                         ; 'd' = 64
 			JE MOVE_RIGHT_PADDLE_DOWN                          ; jump if equal
 			;; after check jump to check the LEFT paddle too ;;
-			JMP EXIT_PADDLE_MOVEMENT
+			JMP CHECK_ESC
 			
 			
 			;;;;;;; MOVE_RIGHT_PADDLE_UP ;;;;;;;
@@ -885,7 +947,12 @@ CODE SEGMENT PARA 'CODE'
 					MOV PADDLE_RIGHT_Y,AX                        ; stay at the end of window
 					JMP EXIT_PADDLE_MOVEMENT
 			
-			
+
+			CHECK_ESC:
+				CMP AL, 1BH
+				JNE EXIT_PADDLE_MOVEMENT
+				CALL DRAW_STOP_GAME			
+
 			EXIT_PADDLE_MOVEMENT:
 				RET
 
