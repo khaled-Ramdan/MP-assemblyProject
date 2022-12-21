@@ -14,6 +14,9 @@ DATA SEGMENT PARA 'DATA'
 	EXITING_GAME DB 0
 	WINNER_INDEX DB 0                    ;the index of the winner (1 -> player one, 2 -> player two)
 	CURRENT_SCENE DB 0                   ; the index of the current scene(0->main menu , 1-> game)
+	Arr1 DB 10 DUP (0)
+	Arr2 DB 10 DUP (0)
+	INFO  DB 0  
 	
 	BALL_ORIGINAL_X DW 0A0h
 	BALL_ORIGINAL_Y DW 64h
@@ -52,6 +55,9 @@ DATA SEGMENT PARA 'DATA'
 	TEXT_DIFF_HARD DB 'HARD -H KEY', '$'
 	TEXT_STOP_GAME_CONTINUE DB 'CONTINUE -ENTER KEY', '$'
 	TEXT_STOP_GAME_EXIT DB 'GO TO MAIN MENU -ESC KEY', '$'
+	TEXT_START_GAME_TITLE DB   'START GAME' ,'$' ;text with START GAME MESSAGE
+	TEXT_NAME_PLAYER_ONE DB 'Enter name of player one:','$' ; Enter name of player one message
+	TEXT_NAME_PLAYER_TWO DB 'Enter name of player two:','$' ; Enter name of player two message
 
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   start paddle   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
@@ -102,6 +108,9 @@ CODE SEGMENT PARA 'CODE'
 		    CMP CURRENT_SCENE,00h
 			JE SHOW_MAIN_MENU
 			
+			CMP INFO,00h
+			JE SHOW_INFO_MENU
+			
 		    CMP GAME_ACTIVE,00h
 			JE  SHOW_GAME_OVER
 			
@@ -134,6 +143,11 @@ CODE SEGMENT PARA 'CODE'
 		    
 			START_EXIT_PROCESS:
 			    CALL CONCLUDE_EXIT_GAME
+				
+				
+			SHOW_INFO_MENU:
+			    CALL DRAW_INFO_MENU
+				JMP CHECK_TIME		
 			
 		RET		
 	MAIN ENDP
@@ -618,6 +632,7 @@ CODE SEGMENT PARA 'CODE'
 			CALL DRAW_DIFFICULTY
 			RET
 		START_MULTIPLAYER:
+		    MOV INFO ,00h
 		    MOV CURRENT_SCENE,01h
 		    MOV GAME_ACTIVE,01h
 			CALL DRAW_DIFFICULTY
@@ -628,6 +643,59 @@ CODE SEGMENT PARA 'CODE'
             RET	
 			
 	DRAW_MAIN_MENU ENDP
+	
+	
+	DRAW_INFO_MENU PROC NEAR 
+	
+	    CALL CLEAR_SCREAN 
+;	    shows SATRT GAMEtitle
+		MOV AH,02h          ;set cursor position
+		MOV BH,00h          ;set page number
+		MOV DH,04h          ;set row
+		MOV DL,04h          ;set column
+		INT 10h
+	    
+		MOV AH,09h                       ; write string to standard output
+		LEA DX,TEXT_START_GAME_TITLE   ;give DX a pointer to the string TEXT_MAIN_MENU_TITLE 
+		INT 21h                          ;print the string
+		
+		
+;		show the player one name message
+        MOV AH,02h          ;set cursor position
+		MOV BH,00h          ;set page number
+		MOV DH,06h          ;set row
+		MOV DL,04h          ;set column
+		INT 10h
+	    
+		MOV AH,09h                       ; write string to standard output
+		LEA DX,TEXT_NAME_PLAYER_ONE     ;give DX a pointer to the string TEXT_MAIN_MENU_TITLE 
+		INT 21h                          ;print the string
+		
+		MOV AH , 10
+		LEA DX,Arr1                        ; enter a string
+		MOV arr1,6
+		INT 21h
+
+		
+;		show the player two name message
+        MOV AH,02h          ;set cursor position
+		MOV BH,00h          ;set page number
+		MOV DH,08h          ;set row
+		MOV DL,04h          ;set column
+		INT 10h
+	    
+		MOV AH,09h                       ; write string to standard output
+		LEA DX,TEXT_NAME_PLAYER_TWO     ;give DX a pointer to the string TEXT_MAIN_MENU_TITLE 
+		INT 21h                          ;print the string
+		
+		MOV AH , 10
+		LEA DX,Arr2                        ; enter a string
+		MOV arr2,6
+		INT 21h
+		
+		
+	 
+	DRAW_INFO_MENU ENDP
 	
 	UPDATE_WINNER_TEXT PROC NEAR
 	    
