@@ -94,6 +94,8 @@ CODE SEGMENT PARA 'CODE'
 			CALL DRAW_BALL; draw ball
 			
 			CALL DRAW_PADDLE    ; set the size of paddle
+			CALL MOVE_PADDLES   ; move the paddles using keyboard
+			
 			CALL DRAW_UI                 ;draw the game User Interface
 			JMP  CHECK_TIME ; after everything checks => check time again
 			
@@ -173,8 +175,8 @@ CODE SEGMENT PARA 'CODE'
 				RET	
 		MOVE_BALL_VERTICALLY:
 	;move the ball vertically
-		MOV AX,BALL_VELOCITY_Y 
-		ADD BALL_Y, AX
+			MOV AX,BALL_VELOCITY_Y 
+			ADD BALL_Y, AX
 		
 		;ball y < 0 (x=>collided)
 		MOV AX,WINDOW_BOUNDS
@@ -187,14 +189,98 @@ CODE SEGMENT PARA 'CODE'
 		CMP BALL_Y,AX
 		JG NEG_VELOCITY_Y
 		
-		RET
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; start COLLISION paddles with ball ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+		;;;;;;   check if the ball is colliding with the right paddle   ;;;;;;
+		;;; maxx1 > minx2 && minx1 < maxx2 && maxy1 > miny1 && miny1 < maxy2   ;;;
+		;; maxx1 = BALL_X + BALL_SIZE   ;; minx2 = PADDLE_RIGHT_X  ;;;;;;;  minx1 = BALL_X ;; maxx2 =  PADDLE_RIGHT_X + PADDLE_WIDTH ;;
+		;; maxy1 = BALL_Y + BALL_SIZE   ;; miny1 = PADDLE_RIGHT_Y  ;;;;;;;  miny1 = BALL_Y ;; maxy2 =  PADDLE_RIGHT_Y + PADDLE_HEIGHT ;;
+		
+		
+		;; if  ( BALL_X + BALL_SIZE ) > PADDLE_RIGHT_X
+		MOV AX,BALL_X
+		ADD AX,BALL_SIZE
+		CMP AX,PADDLE_RIGHT_X								 
+		JNG CHECK_COLLISION_WITH_LEFT_PADDLE                ; if there is no collision ,check for the left collision
+		
+		;; if  ( PADDLE_RIGHT_X + PADDLE_WIDTH ) > BALL_X
+		MOV AX,PADDLE_RIGHT_X
+		ADD AX,PADDLE_WIDTH
+		CMP BALL_X,AX								 
+		JNL CHECK_COLLISION_WITH_LEFT_PADDLE                ; if there is no collision ,check for the left collision
+		
+		
+		;; if  ( BALL_Y + BALL_SIZE ) > PADDLE_RIGHT_Y  
+		MOV AX,BALL_Y
+		ADD AX,BALL_SIZE
+		CMP AX,PADDLE_RIGHT_Y								 
+		JNG CHECK_COLLISION_WITH_LEFT_PADDLE                ; if there is no collision ,check for the left collision
+		
+
+		
+		;; if  ( PADDLE_RIGHT_Y + PADDLE_HEIGHT ) > BALL_Y
+		MOV AX,PADDLE_RIGHT_Y
+		ADD AX,PADDLE_HEIGHT
+		CMP BALL_Y,AX								 
+		JNL CHECK_COLLISION_WITH_LEFT_PADDLE                ; if there is no collision ,check for the left collision
+		
+		; if it reaches here, all conditions are true  , there is a collision
+		JMP NEG_VELOCITY_X
+		
+		
+		;;;;;;   check if the ball is colliding with the left paddle   ;;;;;;
+		
+		CHECK_COLLISION_WITH_LEFT_PADDLE :
+		;;; maxx1 > minx2 && minx1 < maxx2 && maxy1 > miny1 && miny1 < maxy2   ;;;
+		;; maxx1 = BALL_X + BALL_SIZE   ;; minx2 = PADDLE_LEFT_X  ;;;;;;;  minx1 = BALL_X ;; maxx2 =  PADDLE_LEFT_X + PADDLE_WIDTH ;;
+		;; maxy1 = BALL_Y + BALL_SIZE   ;; miny1 = PADDLE_LEFT_Y  ;;;;;;;  miny1 = BALL_Y ;; maxy2 =  PADDLE_LEFT_Y + PADDLE_HEIGHT ;;
+		
+		;; if  ( BALL_X + BALL_SIZE ) > PADDLE_LEFT_X
+		MOV AX,BALL_X
+		ADD AX,BALL_SIZE
+		CMP AX,PADDLE_LEFT_X								 
+		JNG EXIT_COLLISION_CHECK                            ; if there is no collision , exit from fun
+		
+		;; if  ( PADDLE_LEFT_X + PADDLE_WIDTH ) > BALL_X
+		MOV AX,PADDLE_LEFT_X
+		ADD AX,PADDLE_WIDTH
+		CMP BALL_X,AX								 
+		JNL EXIT_COLLISION_CHECK                            ; if there is no collision , exit from fun
+		
+		
+		;; if  ( BALL_Y + BALL_SIZE ) > PADDLE_LEFT_Y  
+		MOV AX,BALL_Y
+		ADD AX,BALL_SIZE
+		CMP AX,PADDLE_LEFT_Y								 
+		JNG EXIT_COLLISION_CHECK                            ; if there is no collision , exit from fun
+		
+
+		
+		;; if  ( PADDLE_LEFT_Y + PADDLE_HEIGHT ) > BALL_Y
+		MOV AX,PADDLE_LEFT_Y
+		ADD AX,PADDLE_HEIGHT
+		CMP BALL_Y,AX								 
+		JNL EXIT_COLLISION_CHECK                            ; if there is no collision , exit from fun
+		
+		
+		; if it reaches here, all conditions are true  , there is a collision
+		JMP NEG_VELOCITY_X
+		
+		
 		;.......negate velocity
-		RESET_POSITOIN:
-			CALL RESET_BALL_POSITION ; BALL_VELOCITY_X = -BALL_VELOCITY_X
-			RET
+
 		NEG_VELOCITY_Y:
 			NEG BALL_VELOCITY_Y ; BALL_VELOCITY_Y = -BALL_VELOCITY_Y
 			RET
+			
+		NEG_VELOCITY_X:
+			NEG BALL_VELOCITY_X              ;reverses the horizontal velocity of the ball
+			RET 
+			
+		EXIT_COLLISION_CHECK:
+			RET
+		
+		
 	MOVE_BALL ENDP
 	
 	DRAW_GAME_OVER_MENU PROC NEAR           ; draw the game over menu
