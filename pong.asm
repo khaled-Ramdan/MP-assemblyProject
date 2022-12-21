@@ -138,6 +138,113 @@ CODE SEGMENT PARA 'CODE'
 		RET		
 	MAIN ENDP
 	
+	DRAW_DIFFICULTY PROC NEAR
+
+		CALL CLEAR_SCREAN                ;clear the screen before displaying the menu
+
+		MOV AH,02h                       ;set cursor position
+		MOV BH,00h                       ;set page number
+		MOV DH,04h                       ;set row 
+		MOV DL,04h						 ;set column
+		INT 10h							 
+		
+		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
+		LEA DX,TEXT_DIFF    ;give DX a pointer 
+		INT 21h                          ;print the string
+
+		MOV AH,02h                       ;set cursor position
+		MOV BH,00h                       ;set page number
+		MOV DH,08h                       ;set row 
+		MOV DL,04h						 ;set column
+		INT 10h							 
+				
+		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
+		LEA DX, TEXT_DIFF_EASY                ;give DX a pointer 
+		INT 21h                          ;print the string
+		
+		MOV AH,02h                       ;set cursor position
+		MOV BH,00h                       ;set page number
+		MOV DH,0Ah                       ;set row 
+		MOV DL,04h						 ;set column
+		INT 10h							 
+				
+		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
+		LEA DX, TEXT_DIFF_MED                ;give DX a pointer 
+		INT 21h                          ;print the string
+		
+		MOV AH,02h                       ;set cursor position
+		MOV BH,00h                       ;set page number
+		MOV DH,0Ch                       ;set row 
+		MOV DL,04h						 ;set column
+		INT 10h							 
+				
+		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
+		LEA DX, TEXT_DIFF_HARD                ;give DX a pointer 
+		INT 21h  
+		
+		MOV AH,02h                       ;set cursor position
+		MOV BH,00h                       ;set page number
+		MOV DH,0Eh                       ;set row 
+		MOV DL,04h						 ;set column
+		INT 10h							 
+				
+		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
+		LEA DX, TEXT_STOP_GAME_EXIT               ;give DX a pointer 
+		INT 21h                        ;print the string
+		
+		
+		REPEAT2:
+;       Waits for a key press
+		MOV AH,00h
+		INT 16h
+
+;       If the key is either 'R' or 'r', restart the game		
+		CMP AL,'E'
+		JE SET_TO_EASY
+		CMP AL,'e'
+		JE SET_TO_EASY
+;       If the key is either 'E' or 'e', exit to main menu
+		CMP AL,'M'
+		JE SET_TO_MED
+		CMP AL,'m'
+		JE SET_TO_MED
+		CMP AL,'H'
+		JE SET_TO_MED
+		CMP AL,'h'
+		JE SET_TO_HARD
+		CMP AL,1BH
+		JE BACK
+		
+		JMP REPEAT2
+		
+		SET_TO_EASY:
+			MOV AX, VELOCITY_X_E
+			MOV BALL_VELOCITY_X, AX
+			MOV AX, VELOCITY_Y_E
+			MOV BALL_VELOCITY_Y, AX
+			RET
+		
+		SET_TO_MED:
+			MOV AX, VELOCITY_X_M
+			MOV BALL_VELOCITY_X, AX
+			MOV AX, VELOCITY_Y_M
+			MOV BALL_VELOCITY_Y, AX
+			RET
+		
+		SET_TO_HARD:
+			MOV AX, VELOCITY_X_H
+			MOV BALL_VELOCITY_X, AX
+			MOV AX, VELOCITY_Y_H
+			MOV BALL_VELOCITY_Y, AX
+			RET
+		
+		BACK:
+			MOV CURRENT_SCENE,00h
+			RET
+			
+
+	DRAW_DIFFICULTY ENDP	
+	
 	PADDLE_COLOR PROC NEAR
 		
 		MOV AX, FLAG_PADDLE_RIGHT
@@ -510,10 +617,12 @@ CODE SEGMENT PARA 'CODE'
 		START_SINGLEPLAYER:
             
             MOV GAME_ACTIVE	, 01h
+			CALL DRAW_DIFFICULTY
 			RET
 		START_MULTIPLAYER:
 		    MOV CURRENT_SCENE,01h
 		    MOV GAME_ACTIVE,01h
+			CALL DRAW_DIFFICULTY
             RET
 		
         EXIT_GAME:
