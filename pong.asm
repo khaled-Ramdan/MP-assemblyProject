@@ -17,6 +17,7 @@ DATA SEGMENT PARA 'DATA'
 	Arr1 DB 10 , 0, 10 DUP('$')
 	Arr2 DB 10 , 0, 10 DUP('$')
 	INFO  DB 0  
+	SINGLE DB 00h
 	
 	BALL_ORIGINAL_X DW 0A0h
 	BALL_ORIGINAL_Y DW 64h
@@ -42,7 +43,6 @@ DATA SEGMENT PARA 'DATA'
 	TEXT_PLAYER_ONE_POINTS DB '0','$'    ;text with the player one points
 	TEXT_PLAYER_TWO_POINTS DB '0','$'    ;text with the player two points
 	TEXT_GAME_OVER_TITLE DB   'GAME OVER' ,'$' ;text with the game over menu
-	TEXT_GAME_OVER_WINNER DB 'Player 0 won', '$' ; text with the winner text
 	TEXT_GAME_OVER_PLAY_AGAIN DB 'pLAY AGAIN -R KEY' , '$' ;text with the play again message
 	TEXT_GAME_OVER_MAIN_MENU DB 'GO TO MAIN MENU -ESC KEY' , '$' ;text with the game over menu message 
 	TEXT_MAIN_MENU_TITLE DB   'MAIN MENU' ,'$' ;text with the main menu
@@ -58,6 +58,7 @@ DATA SEGMENT PARA 'DATA'
 	TEXT_START_GAME_TITLE DB   'START GAME' ,'$' ;text with START GAME MESSAGE
 	TEXT_NAME_PLAYER_ONE DB 'Enter name of player one:','$' ; Enter name of player one message
 	TEXT_NAME_PLAYER_TWO DB 'Enter name of player two:','$' ; Enter name of player two message
+	COMP DB 'computer','$'
  	wn DB 'WINS','$'
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   start paddle   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
@@ -125,13 +126,18 @@ CODE SEGMENT PARA 'CODE'
 			CALL MOVE_BALL; moving the ball procedure
 			CALL DRAW_BALL; draw ball
 			
+			
 			CALL PADDLE_COLOR
 			CALL DRAW_PADDLE    ; set the size of paddle
-			CALL MOVE_PADDLES   ; move the paddles using keyboard
-			
+			CALL MOVE_PADDLES   ; move the paddles using keyboard			
 			CALL DRAW_UI                 ;draw the game User Interface
-			JMP  CHECK_TIME ; after everything checks => check time again
+			cmp SINGLE,1
+			je COMPPAD
 			
+			JMP  CHECK_TIME ; after everything checks => check time again
+			COMPPAD:
+				CALL PADDLE_CHECK
+				JMP CHECK_TIME
 			SHOW_GAME_OVER:
 			    CALL DRAW_GAME_OVER_MENU
 				JMP CHECK_TIME
@@ -152,7 +158,29 @@ CODE SEGMENT PARA 'CODE'
 			
 		RET		
 	MAIN ENDP
-	
+	PADDLE_CHECK PROC NEAR
+		;check if the paddle have to move up
+		mov AX,PADDLE_RIGHT_Y
+		add AX,05h
+		
+		cmp BALL_Y,AX
+		jg MUST_GO_DOWN
+		
+		add AX,14h
+		cmp BALL_Y,AX
+		jl MUST_GO_UP
+		jmp END_PADDLE_CHECK
+		
+		MUST_GO_DOWN:
+			CALL MOVE_RIGHT_PADDLE_DOWN
+			ret
+		MUST_GO_UP:
+			CALL MOVE_RIGHT_PADDLE_UP
+			ret
+		END_PADDLE_CHECK:
+		
+		ret
+	PADDLE_CHECK endp
 	DRAW_DIFFICULTY PROC NEAR
 
 		CALL CLEAR_SCREAN                ;clear the screen before displaying the menu
@@ -509,8 +537,15 @@ CODE SEGMENT PARA 'CODE'
 		mov BL,01h
 		cmp WINNER_INDEX,BL
 		je ONE
+		cmp SINGLE,1
+		je PRINTCOMP
 		MOV AH,09h                       ; write string to standard output
 		LEA DX,Arr2+2     ;give DX a pointer to the string TEXT_GAME_OVER_WINNER 
+		INT 21h                          ;print the string
+		jmp ed
+		PRINTCOMP:
+		MOV AH,09h                       ; write string to standard output
+		LEA DX,COMP     ;give DX a pointer to the string TEXT_GAME_OVER_WINNER 
 		INT 21h                          ;print the string
 		jmp ed
 		
@@ -523,7 +558,7 @@ CODE SEGMENT PARA 'CODE'
 			MOV AH,02h          ;set cursor position
 			MOV BH,00h          ;set page number
 			MOV DH,06h          ;set row
-			MOV DL,0Ah          ;set column
+			MOV DL,11h          ;set column
 			INT 10h
 			MOV AH,09h                       ; write string to standard output
 			LEA DX,wn     ;give DX a pointer to the string TEXT_GAME_OVER_WINNER 
@@ -647,9 +682,13 @@ CODE SEGMENT PARA 'CODE'
 		START_SINGLEPLAYER:
             
             MOV GAME_ACTIVE	, 01h
+			MOV INFO ,00h
+			MOV CURRENT_SCENE,01h
+			mov SINGLE,1
 			CALL DRAW_DIFFICULTY
 			RET
 		START_MULTIPLAYER:
+			mov SINGLE,0
 		    MOV INFO ,00h
 		    MOV CURRENT_SCENE,01h
 		    MOV GAME_ACTIVE,01h
@@ -702,35 +741,36 @@ CODE SEGMENT PARA 'CODE'
 		MOV Arr1,6
 		INT 21h
 
-		
-;		show the player two name message
-        MOV AH,02h          ;set cursor position
-		MOV BH,00h          ;set page number
-		MOV DH,08h          ;set row
-		MOV DL,04h          ;set column
-		INT 10h
-	    
-		MOV AH,09h                       ; write string to standard output
-		LEA DX,TEXT_NAME_PLAYER_TWO     ;give DX a pointer to the string TEXT_MAIN_MENU_TITLE 
-		INT 21h                          ;print the string
-		
-		MOV AH , 0Ah
-		LEA DX,Arr2                        ; enter a string
-		MOV Arr2,6
-		INT 21h
-		
-		
+		cmp SINGLE,1
+		je NOSEC
+	;		show the player two name message
+			MOV AH,02h          ;set cursor position
+			MOV BH,00h          ;set page number
+			MOV DH,08h          ;set row
+			MOV DL,04h          ;set column
+			INT 10h
+			
+			MOV AH,09h                       ; write string to standard output
+			LEA DX,TEXT_NAME_PLAYER_TWO     ;give DX a pointer to the string TEXT_MAIN_MENU_TITLE 
+			INT 21h                          ;print the string
+			
+			MOV AH , 0Ah
+			LEA DX,Arr2                        ; enter a string
+			MOV Arr2,6
+			INT 21h
+		NOSEC:
+		ret
 	 
 	DRAW_INFO_MENU ENDP
 	
-	UPDATE_WINNER_TEXT PROC NEAR
+	;UPDATE_WINNER_TEXT PROC NEAR
 	    
-		MOV AL,WINNER_INDEX                         ;if winner index is 1=> AL,1
-		ADD AL,30h                                  ;AL,31h=>AL,'1'
-	    MOV [TEXT_GAME_OVER_WINNER+7],AL  ;update the index in the text with the character
+	;	MOV AL,WINNER_INDEX                         ;if winner index is 1=> AL,1
+	;	ADD AL,30h                                  ;AL,31h=>AL,'1'
+	 ;   MOV [TEXT_GAME_OVER_WINNER+7],AL  ;update the index in the text with the character
 	
-	    RET
-	UPDATE_WINNER_TEXT ENDP
+	  ;  RET
+	;UPDATE_WINNER_TEXT ENDP
 	
 	;....................................CLEAR SCREAN................
 	CLEAR_SCREAN PROC NEAR
@@ -990,53 +1030,28 @@ CODE SEGMENT PARA 'CODE'
 
 		;;;;;;; Right PADDLE  ;;;;;;;
 		CHECK_RIGHT_PALLLE_MOVEMENT :
-		
+			
+			cmp SINGLE,1
+			je EXIT_PADDLE_MOVEMENT
 			; if it is 'O' or 'o' , move up 
 			CMP AL,'O'                                         ; 'S' = 53
-			JE MOVE_RIGHT_PADDLE_UP                            ; jump if equal
+			JE MOVE_RIGHT_PAD_UP                            ; jump if equal
 			CMP AL,'o'                                         ; 's' = 73
-			JE MOVE_RIGHT_PADDLE_UP                            ; jump if equal
+			JE MOVE_RIGHT_PAD_UP                            ; jump if equal
 			; if it is 'L' or 'l' , move down
 			CMP AL,'L'                                         ; 'D' = 44
-			JE MOVE_RIGHT_PADDLE_DOWN                          ; jump if equal
+			JE MOVE_RIGHT_PAD_DOWN                          ; jump if equal
 			CMP AL,'l'                                         ; 'd' = 64
-			JE MOVE_RIGHT_PADDLE_DOWN                          ; jump if equal
+			JE MOVE_RIGHT_PAD_DOWN                          ; jump if equal
 			;; after check jump to check the LEFT paddle too ;;
 			JMP CHECK_ESC
 			
-			
-			;;;;;;; MOVE_RIGHT_PADDLE_UP ;;;;;;;
-			MOVE_RIGHT_PADDLE_UP :
-				
-				MOV AX,PADDLE_VELOCITY
-				SUB PADDLE_RIGHT_Y,AX	
-				MOV AX,PADDLE_RIGHT_Y
-				CMP AX,WINDOW_BOUNDS                             ; check if the paddle is out the boundaries
-				JL  FIX_PADDLE_RIGHT_POSITION_UP                 ; if out, jump to fix
-				JMP EXIT_PADDLE_MOVEMENT                 
-				
-				FIX_PADDLE_RIGHT_POSITION_UP:
-					MOV AX,WINDOW_BOUNDS
-					MOV PADDLE_RIGHT_Y,AX                        ; put the paddle after WINDOW_BOUNDS  stay at the start of window
-					JMP EXIT_PADDLE_MOVEMENT
-			
-			;;;;;;; MOVE_RIGHT_PADDLE_DOWN ;;;;;;;
-			MOVE_RIGHT_PADDLE_DOWN :
-				
-				MOV AX,PADDLE_VELOCITY
-				ADD PADDLE_RIGHT_Y,AX	                        ; add the movement step to the paddle
-				MOV AX,WINDOW_HEIGHT							; AX = WINDOW_HEIGHT
-				SUB AX,WINDOW_BOUNDS							; AX = WINDOW_HEIGHT - WINDOW_BOUNDS
-				SUB AX,PADDLE_HEIGHT							; AX = WINDOW_HEIGHT - WINDOW_BOUNDS - PADDLE_HEIGHT
-				CMP PADDLE_RIGHT_Y,AX							; IF PADDLE_RIGHT_Y > AX " out from the window "
-				JG  FIX_PADDLE_RIGHT_POSITION_DOWN				; jump if greater
-				JMP EXIT_PADDLE_MOVEMENT
-			
-			
-				FIX_PADDLE_RIGHT_POSITION_DOWN:
-					MOV PADDLE_RIGHT_Y,AX                        ; stay at the end of window
-					JMP EXIT_PADDLE_MOVEMENT
-			
+			MOVE_RIGHT_PAD_UP:
+				CALL MOVE_RIGHT_PADDLE_UP
+				ret
+			MOVE_RIGHT_PAD_DOWN:
+				CALL MOVE_RIGHT_PADDLE_DOWN
+				ret
 
 			CHECK_ESC:
 				CMP AL, 1BH
@@ -1049,7 +1064,43 @@ CODE SEGMENT PARA 'CODE'
 
 		RET
 	MOVE_PADDLES ENDP
+	;;;;;;; MOVE_RIGHT_PADDLE_UP ;;;;;;;
+		MOVE_RIGHT_PADDLE_UP PROC NEAR 
 			
+			MOV AX,PADDLE_VELOCITY
+			SUB PADDLE_RIGHT_Y,AX	
+			MOV AX,PADDLE_RIGHT_Y
+			CMP AX,WINDOW_BOUNDS                             ; check if the paddle is out the boundaries
+			JL  FIX_PADDLE_RIGHT_POSITION_UP                 ; if out, jump to fix
+			JMP EXIT_UP_MOVEMENT                 
+			
+			FIX_PADDLE_RIGHT_POSITION_UP:
+				MOV AX,WINDOW_BOUNDS
+				MOV PADDLE_RIGHT_Y,AX                        ; put the paddle after WINDOW_BOUNDS  stay at the start of window
+				JMP EXIT_UP_MOVEMENT
+			EXIT_UP_MOVEMENT:
+			ret
+		MOVE_RIGHT_PADDLE_UP endp
+		;;;;;;; MOVE_RIGHT_PADDLE_DOWN ;;;;;;;
+		MOVE_RIGHT_PADDLE_DOWN PROC NEAR
+			
+			MOV AX,PADDLE_VELOCITY
+			ADD PADDLE_RIGHT_Y,AX	                        ; add the movement step to the paddle
+			MOV AX,WINDOW_HEIGHT							; AX = WINDOW_HEIGHT
+			SUB AX,WINDOW_BOUNDS							; AX = WINDOW_HEIGHT - WINDOW_BOUNDS
+			SUB AX,PADDLE_HEIGHT							; AX = WINDOW_HEIGHT - WINDOW_BOUNDS - PADDLE_HEIGHT
+			CMP PADDLE_RIGHT_Y,AX							; IF PADDLE_RIGHT_Y > AX " out from the window "
+			JG  FIX_PADDLE_RIGHT_POSITION_DOWN				; jump if greater
+			JMP EXIT_DOWN_MOVEMENT
+		
+		
+			FIX_PADDLE_RIGHT_POSITION_DOWN:
+				MOV PADDLE_RIGHT_Y,AX                        ; stay at the end of window
+				JMP EXIT_DOWN_MOVEMENT
+			
+			EXIT_DOWN_MOVEMENT:
+		ret
+		MOVE_RIGHT_PADDLE_DOWN endp;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  END PADDLE   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	DRAW_UI PROC NEAR
 		
