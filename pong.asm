@@ -40,18 +40,18 @@ DATA SEGMENT PARA 'DATA'
 	TEXT_PLAYER_TWO_POINTS DB '0','$'    ;text with the player two points
 	TEXT_GAME_OVER_TITLE DB   'GAME OVER' ,'$' ;text with the game over menu
 	TEXT_GAME_OVER_WINNER DB 'Player 0 won', '$' ; text with the winner text
-	TEXT_GAME_OVER_PLAY_AGAIN DB 'press R key to play again' , '$' ;text with the play again message
-	TEXT_GAME_OVER_MAIN_MENU DB 'press E to exit to main menu' , '$' ;text with the game over menu message 
+	TEXT_GAME_OVER_PLAY_AGAIN DB 'pLAY AGAIN -R KEY' , '$' ;text with the play again message
+	TEXT_GAME_OVER_MAIN_MENU DB 'GO TO MAIN MENU -ESC KEY' , '$' ;text with the game over menu message 
 	TEXT_MAIN_MENU_TITLE DB   'MAIN MENU' ,'$' ;text with the main menu
 	TEXT_MAIN_MENU_SINGLEPLAYER DB 'SINGLEPLAYER -S KEY','$' ;text with the single player message
 	TEXT_MAIN_MENU_MULTIPLAYER DB 'MULTIPLAYER -M KEY','$' ;text with the multiplayer message
-	TEXT_MAIN_MENU_EXIT DB 'EXIT GAME -E KEY' ,'$' ; text with exit game message
+	TEXT_MAIN_MENU_EXIT DB 'EXIT GAME -ESC KEY' ,'$' ; text with exit game message
 	TEXT_DIFF DB 'GAME DIFFICULTY', '$'
-	TEXT_DIFF_EASY DB 'EASY - E KEY', '$'
-	TEXT_DIFF_MED DB 'MEDIUM - M KEY', '$'
-	TEXT_DIFF_HARD DB 'HARD - H KEY', '$'
-	TEXT_STOP_GAME_CONTINUE DB 'CONTINUE - C KEY', '$'
-	TEXT_STOP_GAME_EXIT DB 'GO TO MAIN MENU - ESC KEY', '$'
+	TEXT_DIFF_EASY DB 'EASY -E KEY', '$'
+	TEXT_DIFF_MED DB 'MEDIUM -M KEY', '$'
+	TEXT_DIFF_HARD DB 'HARD -H KEY', '$'
+	TEXT_STOP_GAME_CONTINUE DB 'CONTINUE -ENTER KEY', '$'
+	TEXT_STOP_GAME_EXIT DB 'GO TO MAIN MENU -ESC KEY', '$'
 
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   start paddle   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
@@ -149,7 +149,7 @@ CODE SEGMENT PARA 'CODE'
 		INT 10h							 
 		
 		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-		LEA DX,TEXT_DIFF    ;give DX a pointer 
+		LEA DX,TEXT_DIFF    			 ;give DX a pointer 
 		INT 21h                          ;print the string
 
 		MOV AH,02h                       ;set cursor position
@@ -159,7 +159,7 @@ CODE SEGMENT PARA 'CODE'
 		INT 10h							 
 				
 		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-		LEA DX, TEXT_DIFF_EASY                ;give DX a pointer 
+		LEA DX, TEXT_DIFF_EASY           ;give DX a pointer 
 		INT 21h                          ;print the string
 		
 		MOV AH,02h                       ;set cursor position
@@ -169,7 +169,7 @@ CODE SEGMENT PARA 'CODE'
 		INT 10h							 
 				
 		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-		LEA DX, TEXT_DIFF_MED                ;give DX a pointer 
+		LEA DX, TEXT_DIFF_MED            ;give DX a pointer 
 		INT 21h                          ;print the string
 		
 		MOV AH,02h                       ;set cursor position
@@ -179,7 +179,7 @@ CODE SEGMENT PARA 'CODE'
 		INT 10h							 
 				
 		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-		LEA DX, TEXT_DIFF_HARD                ;give DX a pointer 
+		LEA DX, TEXT_DIFF_HARD           ;give DX a pointer 
 		INT 21h  
 		
 		MOV AH,02h                       ;set cursor position
@@ -189,8 +189,8 @@ CODE SEGMENT PARA 'CODE'
 		INT 10h							 
 				
 		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-		LEA DX, TEXT_STOP_GAME_EXIT               ;give DX a pointer 
-		INT 21h                        ;print the string
+		LEA DX, TEXT_STOP_GAME_EXIT      ;give DX a pointer 
+		INT 21h                          ;print the string
 		
 		
 		REPEAT2:
@@ -198,20 +198,21 @@ CODE SEGMENT PARA 'CODE'
 		MOV AH,00h
 		INT 16h
 
-;       If the key is either 'R' or 'r', restart the game		
 		CMP AL,'E'
 		JE SET_TO_EASY
 		CMP AL,'e'
 		JE SET_TO_EASY
-;       If the key is either 'E' or 'e', exit to main menu
+
 		CMP AL,'M'
 		JE SET_TO_MED
 		CMP AL,'m'
 		JE SET_TO_MED
+		
 		CMP AL,'H'
 		JE SET_TO_MED
 		CMP AL,'h'
 		JE SET_TO_HARD
+		
 		CMP AL,1BH
 		JE BACK
 		
@@ -527,10 +528,8 @@ CODE SEGMENT PARA 'CODE'
 		JE RESTART_GAME
 		CMP AL,'r'
 		JE RESTART_GAME
-;		if press E or e exit to main menu
-		CMP AL,'E'
-		JE EXIT_TO_MAIN_MENU
-		CMP AL,'e'
+;		if press ESC exit to main menu
+		CMP AL, 1BH
 		JE EXIT_TO_MAIN_MENU
 		RET
 		
@@ -608,10 +607,9 @@ CODE SEGMENT PARA 'CODE'
 		    JE START_MULTIPLAYER
 		    CMP AL,'m'
 		    JE START_MULTIPLAYER
-		    CMP AL,'E'
+		    CMP AL,1BH
 		    JE EXIT_GAME
-		    CMP AL,'e'
-		    JE EXIT_GAME
+
 			JMP MAIN_MENU_WAIT_FOR_KEY
 			
 		START_SINGLEPLAYER:
@@ -777,7 +775,7 @@ CODE SEGMENT PARA 'CODE'
 		RET
 	DRAW_PADDLE ENDP
 	
-		DRAW_STOP_GAME PROC NEAR
+	DRAW_STOP_GAME PROC NEAR
 
 		CALL CLEAR_SCREAN                ;clear the screen before displaying the menu
 
@@ -811,9 +809,7 @@ CODE SEGMENT PARA 'CODE'
 		INT 16h
 
 ;       If the key is either 'R' or 'r', restart the game		
-		CMP AL,'C'
-		JE CONTINUE_GAME
-		CMP AL,'c'
+		CMP AL,0DH
 		JE CONTINUE_GAME
 ;       If the key is either 'E' or 'e', exit to main menu
 		CMP AL,1BH
@@ -851,15 +847,15 @@ CODE SEGMENT PARA 'CODE'
 		;;; check which key is being preesed  ;;;
 		MOV AH, 00H										  ; AL = ASCII OF key
 		INT 16H											  ; execute int 16H for keyboard
-		; if it is 'K' or 'k' , move up 
-		CMP AL,4BH                                         ; 'K' = 4B
+		; if it is 'W' or 'w' , move up 
+		CMP AL, 'W'                                        
 		JE MOVE_LEFT_PADDLE_UP                             ; jump if equal
-		CMP AL,6BH                                         ; 'k' = 6B
+		CMP AL,'w'                                         
 		JE MOVE_LEFT_PADDLE_UP                             ; jump if equal
-		; if it is 'L' or 'l' , move down
-		CMP AL,4CH                                         ; 'L' = 4C
+		; if it is 'S' or 's' , move down
+		CMP AL,'S'                                         
 		JE MOVE_LEFT_PADDLE_DOWN                           ; jump if equal
-		CMP AL,6CH                                         ; 'l' = 6C
+		CMP AL,'s'                                         
 		JE MOVE_LEFT_PADDLE_DOWN                           ; jump if equal
 		;; after check jump to check the right paddle too ;;
 		JMP CHECK_RIGHT_PALLLE_MOVEMENT
@@ -901,15 +897,15 @@ CODE SEGMENT PARA 'CODE'
 		;;;;;;; Right PADDLE  ;;;;;;;
 		CHECK_RIGHT_PALLLE_MOVEMENT :
 		
-			; if it is 'S' or 's' , move up 
-			CMP AL,53H                                         ; 'S' = 53
+			; if it is 'O' or 'o' , move up 
+			CMP AL,'O'                                         ; 'S' = 53
 			JE MOVE_RIGHT_PADDLE_UP                            ; jump if equal
-			CMP AL,73H                                         ; 's' = 73
+			CMP AL,'o'                                         ; 's' = 73
 			JE MOVE_RIGHT_PADDLE_UP                            ; jump if equal
-			; if it is 'D' or 'd' , move down
-			CMP AL,44H                                         ; 'D' = 44
+			; if it is 'L' or 'l' , move down
+			CMP AL,'L'                                         ; 'D' = 44
 			JE MOVE_RIGHT_PADDLE_DOWN                          ; jump if equal
-			CMP AL,64H                                         ; 'd' = 64
+			CMP AL,'l'                                         ; 'd' = 64
 			JE MOVE_RIGHT_PADDLE_DOWN                          ; jump if equal
 			;; after check jump to check the LEFT paddle too ;;
 			JMP CHECK_ESC
