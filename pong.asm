@@ -352,6 +352,7 @@ CODE SEGMENT PARA 'CODE'
 		
 		;ball x < 0 (y => collided)
 		MOV AX,WINDOW_BOUNDS
+		ADD AX,PADDLE_WIDTH
 		CMP BALL_X,AX
 		JL GIVE_POINT_TO_PLAYER_TWO
 	
@@ -359,6 +360,7 @@ CODE SEGMENT PARA 'CODE'
 		MOV AX,WINDOW_WIDTH
 		SUB AX,BALL_SIZE
 		SUB AX,WINDOW_BOUNDS
+		SUB AX,PADDLE_WIDTH
 		CMP BALL_X,AX
 		JG GIVE_POINT_TO_PLAYER_ONE 
 		JMP MOVE_BALL_VERTICALLY
@@ -424,7 +426,7 @@ CODE SEGMENT PARA 'CODE'
 		JMP	NEG_VELOCITY_Y	
 		NOT_BIGGER:   
 		
-		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; start COLLISION paddles with ball ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; start COLLISION paddles with ball ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 		;;;;;;   check if the ball is colliding with the right paddle   ;;;;;;
 		;;; maxx1 > minx2 && minx1 < maxx2 && maxy1 > miny1 && miny1 < maxy2   ;;;
@@ -435,12 +437,14 @@ CODE SEGMENT PARA 'CODE'
 		;; if  ( BALL_X + BALL_SIZE ) > PADDLE_RIGHT_X
 		MOV AX,BALL_X
 		ADD AX,BALL_SIZE
+		ADD AX,05H
 		CMP AX,PADDLE_RIGHT_X								 
 		JNG CHECK_COLLISION_WITH_LEFT_PADDLE                ; if there is no collision ,check for the left collision
 		
 		;; if  ( PADDLE_RIGHT_X + PADDLE_WIDTH ) > BALL_X
 		MOV AX,PADDLE_RIGHT_X
 		ADD AX,PADDLE_WIDTH
+		ADD AX,05H
 		CMP BALL_X,AX								 
 		JNL CHECK_COLLISION_WITH_LEFT_PADDLE                ; if there is no collision ,check for the left collision
 		
@@ -448,6 +452,7 @@ CODE SEGMENT PARA 'CODE'
 		;; if  ( BALL_Y + BALL_SIZE ) > PADDLE_RIGHT_Y  
 		MOV AX,BALL_Y
 		ADD AX,BALL_SIZE
+		ADD AX,05H
 		CMP AX,PADDLE_RIGHT_Y								 
 		JNG CHECK_COLLISION_WITH_LEFT_PADDLE                ; if there is no collision ,check for the left collision
 		
@@ -456,6 +461,7 @@ CODE SEGMENT PARA 'CODE'
 		;; if  ( PADDLE_RIGHT_Y + PADDLE_HEIGHT ) > BALL_Y
 		MOV AX,PADDLE_RIGHT_Y
 		ADD AX,PADDLE_HEIGHT
+		ADD AX,05H
 		CMP BALL_Y,AX								 
 		JNL CHECK_COLLISION_WITH_LEFT_PADDLE                ; if there is no collision ,check for the left collision
 		
@@ -479,12 +485,14 @@ CODE SEGMENT PARA 'CODE'
 		;; if  ( BALL_X + BALL_SIZE ) > PADDLE_LEFT_X
 		MOV AX,BALL_X
 		ADD AX,BALL_SIZE
+		ADD AX,05H
 		CMP AX,PADDLE_LEFT_X								 
 		JNG EXIT_COLLISION_CHECK                            ; if there is no collision , exit from fun
 		
 		;; if  ( PADDLE_LEFT_X + PADDLE_WIDTH ) > BALL_X
 		MOV AX,PADDLE_LEFT_X
 		ADD AX,PADDLE_WIDTH
+		ADD AX,05H
 		CMP BALL_X,AX								 
 		JNL EXIT_COLLISION_CHECK                            ; if there is no collision , exit from fun
 		
@@ -492,6 +500,7 @@ CODE SEGMENT PARA 'CODE'
 		;; if  ( BALL_Y + BALL_SIZE ) > PADDLE_LEFT_Y  
 		MOV AX,BALL_Y
 		ADD AX,BALL_SIZE
+		ADD AX,05H
 		CMP AX,PADDLE_LEFT_Y								 
 		JNG EXIT_COLLISION_CHECK                            ; if there is no collision , exit from fun
 		
@@ -500,6 +509,7 @@ CODE SEGMENT PARA 'CODE'
 		;; if  ( PADDLE_LEFT_Y + PADDLE_HEIGHT ) > BALL_Y
 		MOV AX,PADDLE_LEFT_Y
 		ADD AX,PADDLE_HEIGHT
+		ADD AX,05H
 		CMP BALL_Y,AX								 
 		JNL EXIT_COLLISION_CHECK                            ; if there is no collision , exit from fun
 		
