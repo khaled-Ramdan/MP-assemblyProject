@@ -1075,7 +1075,7 @@ CODE SEGMENT PARA 'CODE'
 			CMP AL,'l'                                         ; 'd' = 64
 			JE MOVE_RIGHT_PAD_DOWN                          ; jump if equal
 			;; after check jump to check the LEFT paddle too ;;
-			
+			JMP CHECK_ESC
 			MOVE_RIGHT_PAD_UP:
 				CALL MOVE_RIGHT_PADDLE_UP
 				ret
