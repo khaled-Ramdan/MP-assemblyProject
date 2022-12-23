@@ -53,7 +53,7 @@ https://user-images.githubusercontent.com/64746678/209350842-959b4c63-0539-4f11-
 ## Game Description
 There are two players one on the left and one on the right
 the objective is to strike the ball to go past the other player
-when the ball collides with one paddle, a point is given to the other player.
+when the ball collides with left boundaries, a point is given to the right player,vice verse.
 ### the Game play
 The game has two modes *`single mode`* and *`multi mode`*
 * single mode
