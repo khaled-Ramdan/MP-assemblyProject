@@ -208,6 +208,7 @@ CODE SEGMENT PARA 'CODE'
 	DRAW_DIFFICULTY PROC NEAR
 
 		CALL CLEAR_SCREAN                ;clear the screen before displaying the menu
+		CALL PAINT_PIXELS_IN_BLACK
 
 		MOV AH,02h                       ;set cursor position
 		MOV BH,00h                       ;set page number
@@ -381,6 +382,7 @@ CODE SEGMENT PARA 'CODE'
 			
 			CMP PLAYER_ONE_POINTS,05h   ;check if this player has reached 5 points
 			JGE GAME_OVER                ;if this player points is 5, the game is over
+			CALL PAINT_PIXELS2_IN_BLACK
 			RET
 		
 		
@@ -394,6 +396,7 @@ CODE SEGMENT PARA 'CODE'
 			
 			CMP PLAYER_TWO_POINTS,05h  ;check if this player has reached 5 points
 			JGE GAME_OVER                ;if this player points is 5 or more, the game is over
+			CALL PAINT_PIXELS2_IN_BLACK	
 			RET
 		
 		GAME_OVER:  		;someone has reached 5 points
@@ -579,7 +582,6 @@ CODE SEGMENT PARA 'CODE'
 			JMP LOOP__			
 			EXIT:
 				CALL CLEAR_SCREAN
-				CALL PAINT_PIXELS2_IN_BLACK
 				RET		
 
 	SHOW_GOAL ENDP
@@ -587,7 +589,8 @@ CODE SEGMENT PARA 'CODE'
 	DRAW_GAME_OVER_MENU PROC NEAR           ; draw the game over menu
 	    
 	    CALL CLEAR_SCREAN                   ;clear the screen before displaying the menu
-		
+		CALL PAINT_PIXELS_IN_BLACK	
+
 ;       shows the menu title
 		MOV AH,02h          ;set cursor position
 		MOV BH,00h          ;set page number
@@ -688,6 +691,7 @@ CODE SEGMENT PARA 'CODE'
 	DRAW_MAIN_MENU PROC NEAR 
 	
 	  CALL CLEAR_SCREAN 
+	  CALL PAINT_PIXELS_IN_BLACK
 ;	    shows the menu title
 		MOV AH,02h          ;set cursor position
 		MOV BH,00h          ;set page number
@@ -753,7 +757,6 @@ CODE SEGMENT PARA 'CODE'
 			JMP MAIN_MENU_WAIT_FOR_KEY
 			
 		START_SINGLEPLAYER:
-            
             MOV GAME_ACTIVE	, 01h
 			MOV INFO ,00h
 			MOV CURRENT_SCENE,01h
@@ -778,6 +781,7 @@ CODE SEGMENT PARA 'CODE'
 	DRAW_INFO_MENU PROC NEAR 
 	
 	    CALL CLEAR_SCREAN 
+		CALL PAINT_PIXELS_IN_BLACK
 ;	    shows SATRT GAMEtitle
 		MOV AH,02h          ;set cursor position
 		MOV BH,00h          ;set page number
@@ -832,6 +836,7 @@ CODE SEGMENT PARA 'CODE'
 			MOV Arr2,6
 			INT 21h
 		NOSEC:
+		CALL PAINT_PIXELS_IN_BLACK
 		ret
 	 
 	DRAW_INFO_MENU ENDP
@@ -890,9 +895,9 @@ CODE SEGMENT PARA 'CODE'
 		MOV CX,0BH                    ;set the initial column (X)
 		MOV DX,0FH                    ;set the initial line (Y)
 		MOV AX, CX
-		ADD AX, 0AH
+		ADD AX, 0FH
 		MOV BX, DX
-		ADD BX, 05H
+		ADD BX, 0FH
 
 		PAINT2_HORIZONTAL:
 			MOV AH,0Ch                   ;set the configuration to writing a pixel
@@ -1063,6 +1068,7 @@ CODE SEGMENT PARA 'CODE'
 	DRAW_STOP_GAME PROC NEAR
 
 		CALL CLEAR_SCREAN                ;clear the screen before displaying the menu
+		CALL PAINT_PIXELS_IN_BLACK
 
 		CALL DRAW_UI
 
