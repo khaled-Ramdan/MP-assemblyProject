@@ -137,7 +137,6 @@ CODE SEGMENT PARA 'CODE'
 			mov color,0fh
 			CALL DRAW_BALL; draw ball
 			
-			
 			CALL PADDLE_COLOR			
 			CALL MOVE_PADDLES   ; move the paddles using keyboard
 			
@@ -178,6 +177,7 @@ CODE SEGMENT PARA 'CODE'
 				mov INFO,01h
 			    CALL DRAW_INFO_MENU
 				CALL CLEAR_SCREAN
+				CALL PAINT_PIXELS_IN_BLACK
 				JMP CHECK_TIME		
 			
 		RET		
@@ -1098,7 +1098,7 @@ CODE SEGMENT PARA 'CODE'
 ;       Waits for a key press
 		MOV AH,00h
 		INT 16h
-
+		
 ;       If the key is either 'R' or 'r', restart the game		
 		CMP AL,0DH
 		JE CONTINUE_GAME
