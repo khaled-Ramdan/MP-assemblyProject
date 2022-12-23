@@ -663,26 +663,29 @@ CODE SEGMENT PARA 'CODE'
 		LEA DX,TEXT_GAME_OVER_MAIN_MENU    ;give DX a pointer to the string TEXT_GAME_OVER_PLAY_AGAIN 
 		INT 21h                          ;print the string
 		
-;       waits for a key presse
-        MOV AH,00h
-		INT 16h
-;       if press R or r restart game 		
-		CMP AL,'R'
-		JE RESTART_GAME
-		CMP AL,'r'
-		JE RESTART_GAME
-;		if press ESC exit to main menu
-		CMP AL, 1BH
-		JE EXIT_TO_MAIN_MENU
-		RET
+		LOOOOP:
+	;       waits for a key presse
+			MOV AH,00h
+			INT 16h
+	;       if press R or r restart game 		
+			CMP AL,'R'
+			JE RESTART_GAME
+			CMP AL,'r'
+			JE RESTART_GAME
+	;		if press ESC exit to main menu
+			CMP AL, 1BH
+			JE EXIT_TO_MAIN_MENU
+		JMP LOOOOP
 		
 		RESTART_GAME:
+			CALL PAINT_PIXELS_IN_BLACK
 		    MOV GAME_ACTIVE,01h
             RET
 			
 		EXIT_TO_MAIN_MENU:
             MOV GAME_ACTIVE,00h
 			MOV CURRENT_SCENE,00h 
+			CALL PAINT_PIXELS_IN_BLACK
 			RET
 			
 		
@@ -690,8 +693,8 @@ CODE SEGMENT PARA 'CODE'
 	
 	DRAW_MAIN_MENU PROC NEAR 
 	
-	  CALL CLEAR_SCREAN 
-	  CALL PAINT_PIXELS_IN_BLACK
+		CALL CLEAR_SCREAN 
+		CALL PAINT_PIXELS_IN_BLACK	
 ;	    shows the menu title
 		MOV AH,02h          ;set cursor position
 		MOV BH,00h          ;set page number
