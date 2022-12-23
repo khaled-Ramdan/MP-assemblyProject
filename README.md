@@ -56,14 +56,14 @@ the objective is to strike the ball to go past the other player
 when the ball collides with left boundaries, a point is given to the right player,vice verse.
 ### the Game play
 The game has two modes *`single mode`* and *`multi mode`*
-* single mode
-there is a single palyer palys against computer
-the player Enters his name and start the game 
+* single mode __
+there is a single palyer palys against computer.__
+the player Enters his name and start the game. __
 the paddle is moved using buttons "W-S" on the keyboard.
-* multi mode 
+* multi mode __
 There are two payers plays agianst each others
-Each player Enter his name and start the game
-the left paddle if for player one and moved with "W-S" buttons from keyboard
+Each player Enter his name and start the game.__
+the left paddle if for player one and moved with "W-S" buttons from keyboard.__
 the right paddle is for player two and moved with "O-L" buttons from keyboard.
 
 
@@ -73,9 +73,9 @@ the right paddle is for player two and moved with "O-L" buttons from keyboard.
 
 ### Layout Overview
 #### 1. Main Menu
-* Single player   " press s " 
-* Multi player    " press m " 
-* Exit            " press esc " 
+* Single player   " press s ".
+* Multi player    " press m ".
+* Exit            " press esc ". 
 
 #### 2. Game Difficulty
 there are three levels of ball speed
@@ -107,7 +107,10 @@ there are three levels of ball speed
 
 
 
-https://user-images.githubusercontent.com/66100565/209395375-f85eaca6-0811-45a3-99c2-c30096eaa8b2.mp4
+
+
+
+https://user-images.githubusercontent.com/66100565/209395521-416dea88-78c1-49ca-babe-11a54cdf71ca.mp4
 
 
 
