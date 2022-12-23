@@ -10,7 +10,7 @@ DATA SEGMENT PARA 'DATA'
 	WINDOW_BOUNDS DW 6;variable used to check collsions eaerly
 	
 	PERIOD DW 4
-	GOAL_PERIOD DW 13
+	GOAL_PERIOD DW 15
 	FLAG_GOAL DW 0H
 	TIME_AUX DB 0; variable used when checking if the time has changed
 	GAME_ACTIVE DB 1                     ;is the game active? (1 -> Yes, 0 -> No (game over))
