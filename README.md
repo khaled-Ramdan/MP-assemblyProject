@@ -54,6 +54,18 @@ https://user-images.githubusercontent.com/64746678/209350842-959b4c63-0539-4f11-
 There are two players one on the left and one on the right
 the objective is to strike the ball to go past the other player
 when the ball collides with one paddle, a point is given to the other player.
+### the Game play
+The game has two modes *`single mode`* and *`multi mode`*
+* single mode
+there is a single palyer palys against computer
+the player Enters his name and start the game 
+the paddle is moved using buttons "W-S" on the keyboard.
+* multi mode 
+There are two payers plays agianst each others
+Each player Enter his name and start the game
+the left paddle if for player one and moved with "W-S" buttons from keyboard
+the right paddle is for player two and moved with "O-L" buttons from keyboard.
+
 
 ### Game Objects 
 * paddle moves up and down by pressing keys or AI movement.
@@ -65,18 +77,8 @@ when the ball collides with one paddle, a point is given to the other player.
 * Multi player    " press m " 
 * Exit            " press esc " 
 
-## the Game play
-the game has two modes *`single mode`* and *`multi mode`*
 
-### single mode
-there is a single palyer palys against computer
-the player Enters his name and start the game 
-the paddle is moved using buttons "W-S" on the keyboard
-### multi mode 
-There are two payers plays agianst each others
-Each player Enter his name and start the game
-the left paddle if for player one and moved with "W-S" buttons from keyboard
-the right paddle is for player two and moved with "O-L" buttons from keyboard
+
 
 
 
