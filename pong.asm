@@ -344,39 +344,6 @@ CODE SEGMENT PARA 'CODE'
 		RET
 
 	PADDLE_COLOR ENDP
-	
-	SHOW_GOAL PROC NEAR
-
-		MOV AX, GOAL_PERIOD
-		MOV FLAG_GOAL, AX
-
-		MOV AH,02h          ;set cursor position
-		MOV BH,00h          ;set page number
-		MOV DH,0Bh          ;set row
-		MOV DL,0Bh          ;set column
-		INT 10h
-	    
-		MOV AH,09h                       ; write string to standard output
-		LEA DX,TEXT_GOAL                 ;give DX a pointer to the string TEXT_MAIN_MENU_TITLE 
-		INT 21h                          ;print the string	
-		
-		LOOP__:
-
-			MOV AH,2Ch;get the system time 
-			INT 21h ; CH = hour CL = minute DH = second DL = 1/100 second
-			
-			CMP DL,TIME_AUX; is the current time equal to the previous one(TIME_AUX)?
-			JE LOOP__	;if it is the same => check again
-			MOV TIME_AUX, DL;update time	
-			DEC FLAG_GOAL
-			CMP FLAG_GOAL, 0H
-			JL EXIT
-			JMP LOOP__			
-			EXIT:
-				CALL CLEAR_SCREAN
-				RET		
-
-	SHOW_GOAL ENDP
 	;...................................MOVE BALL..................
 	MOVE_BALL PROC NEAR
 		mov color,00h
@@ -413,6 +380,7 @@ CODE SEGMENT PARA 'CODE'
 		
 		
 		GIVE_POINT_TO_PLAYER_TWO:        ;give one point to the player two and reset ball position
+			CALL SHOW_GOAL
 			INC PLAYER_TWO_POINTS      ;increment player two points
 			CALL RESET_BALL_POSITION     ;reset ball position to the center of the screen
 			
@@ -575,6 +543,39 @@ CODE SEGMENT PARA 'CODE'
 		
 		
 	MOVE_BALL ENDP
+	
+	SHOW_GOAL PROC NEAR
+
+		MOV AX, GOAL_PERIOD
+		MOV FLAG_GOAL, AX
+
+		MOV AH,02h          ;set cursor position
+		MOV BH,00h          ;set page number
+		MOV DH,0Bh          ;set row
+		MOV DL,0Bh          ;set column
+		INT 10h
+	    
+		MOV AH,09h                       ; write string to standard output
+		LEA DX,TEXT_GOAL                 ;give DX a pointer to the string TEXT_MAIN_MENU_TITLE 
+		INT 21h                          ;print the string	
+		
+		LOOP__:
+
+			MOV AH,2Ch;get the system time 
+			INT 21h ; CH = hour CL = minute DH = second DL = 1/100 second
+			
+			CMP DL,TIME_AUX; is the current time equal to the previous one(TIME_AUX)?
+			JE LOOP__	;if it is the same => check again
+			MOV TIME_AUX, DL;update time	
+			DEC FLAG_GOAL
+			CMP FLAG_GOAL, 0H
+			JL EXIT
+			JMP LOOP__			
+			EXIT:
+				CALL CLEAR_SCREAN
+				RET		
+
+	SHOW_GOAL ENDP
 	
 	DRAW_GAME_OVER_MENU PROC NEAR           ; draw the game over menu
 	    
