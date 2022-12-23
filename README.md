@@ -57,21 +57,14 @@ when the ball collides with left boundaries, a point is given to the right playe
 ### the Game play
 The game has two modes *`single mode`* and *`multi mode`*
 * single mode
-
-there is a single palyer palys against computer.
-
-the player Enters his name and start the game.
-
-the paddle is moved using buttons "W-S" on the keyboard.
+  - there is a single palyer palys against computer.
+  - The player Enters his name and start the game.
+  - The paddle is moved using buttons "W-S" on the keyboard.
 * multi mode
-
-There are two payers plays agianst each others.
-
-Each player Enter his name and start the game.
-
-the left paddle if for player one and moved with "W-S" buttons from keyboard.
-
-the right paddle is for player two and moved with "O-L" buttons from keyboard.
+  - There are two payers plays agianst each others.
+  - Each player Enter his name and start the game.
+  - The left paddle if for player one and moved with "W-S" buttons from keyboard.
+  - The right paddle is for player two and moved with "O-L" buttons from keyboard.
 
 
 ### Game Objects 
