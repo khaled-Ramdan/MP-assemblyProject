@@ -131,7 +131,7 @@ CODE SEGMENT PARA 'CODE'
 			CMP DL,TIME_AUX; is the current time equal to the previous one(TIME_AUX)?
 			JE CHECK_TIME	;if it is the same => check again
 			MOV TIME_AUX, DL;update time
-			inc timeforelza3ama
+			inc timeforelza3ama 
 			;CALL CLEAR_SCREAN;  clear the screen before drawing ball
 			CALL MOVE_BALL; moving the ball procedure
 			mov color,0fh
@@ -154,7 +154,7 @@ CODE SEGMENT PARA 'CODE'
 			JMP  CHECK_TIME ; after everything checks => check time again
 			COMPPAD:
 				cmp timeforelza3ama,01H
-				jl ta7t
+				jne ta7t
 				mov timeforelza3ama,00h
 				CALL PADDLE_CHECK
 				ta7t:
@@ -579,6 +579,7 @@ CODE SEGMENT PARA 'CODE'
 			JMP LOOP__			
 			EXIT:
 				CALL CLEAR_SCREAN
+				CALL PAINT_PIXELS2_IN_BLACK
 				RET		
 
 	SHOW_GOAL ENDP
@@ -858,6 +859,60 @@ CODE SEGMENT PARA 'CODE'
 	
 		RET
 	CLEAR_SCREAN ENDP
+	
+	PAINT_PIXELS_IN_BLACK PROC NEAR
+
+		MOV CX,0                    ;set the initial column (X)
+		MOV DX,0                    ;set the initial line (Y)
+		
+		PAINT_HORIZONTAL:
+			MOV AH,0Ch                   ;set the configuration to writing a pixel
+			MOV AL,0H 					 ;choose white as color
+			MOV BH,00h 					 ;set the page number 
+			INT 10h    					 ;execute the configuration
+			
+			INC CX     					 ;CX = CX + 1
+			CMP CX,200
+			JNG PAINT_HORIZONTAL
+			
+			MOV CX,0 				 ;the CX register goes back to the initial column
+			INC DX       				 ;we advance one line
+			CMP DX,320
+			JNG PAINT_HORIZONTAL
+			
+		RET
+		
+
+	PAINT_PIXELS_IN_BLACK ENDP
+	
+	PAINT_PIXELS2_IN_BLACK PROC NEAR
+
+		MOV CX,0BH                    ;set the initial column (X)
+		MOV DX,0FH                    ;set the initial line (Y)
+		MOV AX, CX
+		ADD AX, 0AH
+		MOV BX, DX
+		ADD BX, 05H
+
+		PAINT2_HORIZONTAL:
+			MOV AH,0Ch                   ;set the configuration to writing a pixel
+			MOV AL,0H 					 ;choose white as color
+			MOV BH,00h 					 ;set the page number 
+			INT 10h    					 ;execute the configuration
+			
+			INC CX     					 ;CX = CX + 1
+			CMP CX,AX
+			JNG PAINT2_HORIZONTAL
+			
+			MOV CX,0 				 ;the CX register goes back to the initial column
+			INC DX       				 ;we advance one line
+			CMP DX,BX
+			JNG PAINT2_HORIZONTAL
+			
+		RET
+		
+
+	PAINT_PIXELS2_IN_BLACK ENDP
 	
 	CONCLUDE_EXIT_GAME PROC NEAR  ; goes back to the text mode
 	
