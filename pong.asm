@@ -154,7 +154,7 @@ CODE SEGMENT PARA 'CODE'
 			JMP  CHECK_TIME ; after everything checks => check time again
 			COMPPAD:
 				cmp timeforelza3ama,01H
-				jne ta7t
+				jl ta7t
 				mov timeforelza3ama,00h
 				CALL PADDLE_CHECK
 				ta7t:
