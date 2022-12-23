@@ -72,10 +72,14 @@ DATA SEGMENT PARA 'DATA'
 	;; Left Paddle ;;
 	PADDLE_LEFT_X  DW 0AH                       ; position of left paddle  X
 	PADDLE_LEFT_Y  DW 88H			    ; position of left paddle  Y
+	PADDLE_L_ORIGINAL_X DW 0Ah
+	PADDLE_L_ORIGINAL_Y DW 88h
 	PLAYER_ONE_POINTS DB 0              ;current points of the left player (player one)
 	;; Right paddle ;;
 	PADDLE_RIGHT_X  DW 130H                     ; position of right paddle  X
 	PADDLE_RIGHT_Y  DW 88H			    ; position of right paddle  Y
+	PADDLE_R_ORIGINAL_X DW 130h
+	PADDLE_R_ORIGINAL_Y DW 88h
 	PLAYER_TWO_POINTS DB 0             ;current points of the right player (player two)
 	;; size of paddles ;;
 	PADDLE_WIDTH   DW 05H                       ; width of the paddle
@@ -369,6 +373,7 @@ CODE SEGMENT PARA 'CODE'
 		
 		GIVE_POINT_TO_PLAYER_ONE:	 ;give one point to the player one and reset ball position
 			CALL SHOW_GOAL
+			call RESET_PADDLE_POSITION
 			INC PLAYER_ONE_POINTS       ;increment player one points
 			CALL RESET_BALL_POSITION     ;reset ball position to the center of the screen
 			
@@ -381,6 +386,7 @@ CODE SEGMENT PARA 'CODE'
 		
 		GIVE_POINT_TO_PLAYER_TWO:        ;give one point to the player two and reset ball position
 			CALL SHOW_GOAL
+			call RESET_PADDLE_POSITION
 			INC PLAYER_TWO_POINTS      ;increment player two points
 			CALL RESET_BALL_POSITION     ;reset ball position to the center of the screen
 			
@@ -908,6 +914,24 @@ CODE SEGMENT PARA 'CODE'
 		
 		RET
 	RESET_BALL_POSITION ENDP
+	
+	RESET_PADDLE_POSITION PROC NEAR        ;restart PADDLE position to the original position
+
+		MOV AX,PADDLE_R_ORIGINAL_X
+		MOV PADDLE_RIGHT_X,AX
+		
+		MOV AX,PADDLE_R_ORIGINAL_Y
+		MOV PADDLE_RIGHT_Y,AX
+
+		MOV AX,PADDLE_L_ORIGINAL_X
+		MOV PADDLE_LEFT_X,AX
+		
+		MOV AX,PADDLE_L_ORIGINAL_Y
+		MOV PADDLE_LEFT_Y,AX
+		
+		RET
+
+	RESET_PADDLE_POSITION ENDP
 	
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  START PADDLE   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
