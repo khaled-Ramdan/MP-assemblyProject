@@ -1,7 +1,8 @@
 STACK SEGMENT PARA STACK 
-	DB 64 DUP (' ')
+	DB 64 DUP (' ') ;initialize the stack 
 STACK ENDS
 
+;;;...............start data segment
 DATA SEGMENT PARA 'DATA'
 
 	WINDOW_WIDTH DW 140h ;The width of the window (320 pixels)
@@ -87,11 +88,11 @@ DATA SEGMENT PARA 'DATA'
 	
 DATA ENDS 
 
-
+;;...................................................start code........................................................
 CODE SEGMENT PARA 'CODE'
 
 	MAIN PROC FAR
-	ASSUME CS:CODE,DS:DATA,SS:STACK ;assume as code,data and stack with thier respective registers
+	ASSUME CS:CODE,DS:DATA,SS:STACK 			;assume as code,data and stack with thier respective registers
 	PUSH DS						 	; push to the stack DS segment 
 	SUB AX,AX 						; clean the AX register 
 	PUSH AX							; push AX to the stack
@@ -99,7 +100,6 @@ CODE SEGMENT PARA 'CODE'
 	MOV DS,AX						;save on the Ds segment the content of AX
 	POP AX							;release the top item of the stack to the Ax register
 	POP AX							;release the top item of the stack to the Ax register
-	
 	
 	
 		CALL CLEAR_SCREAN
@@ -197,7 +197,7 @@ CODE SEGMENT PARA 'CODE'
 		END_PADDLE_CHECK:
 		
 		ret
-	PADDLE_CHECK endp
+	PADDLE_CHECK ENDP
 	DRAW_DIFFICULTY PROC NEAR
 
 		CALL CLEAR_SCREAN                ;clear the screen before displaying the menu
@@ -346,7 +346,7 @@ CODE SEGMENT PARA 'CODE'
 	MOVE_BALL PROC NEAR
 		mov color,00h
 		CALL DRAW_BALL
-	;move the ball horizontally
+	;move the ball horizontally 
 		MOV AX,BALL_VELOCITY_X 
 		ADD BALL_X, AX		   
 		
@@ -356,7 +356,7 @@ CODE SEGMENT PARA 'CODE'
 		CMP BALL_X,AX
 		JL GIVE_POINT_TO_PLAYER_TWO
 	
-		;ball x > window_width -ball size - window bounds (y=>collided) 
+		 ;ball x > window_width -ball size - window bounds (y=>collided) 
 		MOV AX,WINDOW_WIDTH
 		SUB AX,BALL_SIZE
 		SUB AX,WINDOW_BOUNDS
@@ -365,14 +365,14 @@ CODE SEGMENT PARA 'CODE'
 		JG GIVE_POINT_TO_PLAYER_ONE 
 		JMP MOVE_BALL_VERTICALLY
 		
-		GIVE_POINT_TO_PLAYER_ONE:		 ;give one point to the player one and reset ball position
+		GIVE_POINT_TO_PLAYER_ONE:	 ;give one point to the player one and reset ball position
 			INC PLAYER_ONE_POINTS       ;increment player one points
 			CALL RESET_BALL_POSITION     ;reset ball position to the center of the screen
 			
 			CALL UPDATE_TEXT_PLAYER_ONE_POINTS ;update the text of the player one points
 			
 			CMP PLAYER_ONE_POINTS,05h   ;check if this player has reached 5 points
-			JGE GAME_OVER                ;if this player points is 5 or more, the game is over
+			JGE GAME_OVER                ;if this player points is 5, the game is over
 			RET
 		
 		
