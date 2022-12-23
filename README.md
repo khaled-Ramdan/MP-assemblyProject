@@ -72,15 +72,31 @@ the right paddle is for player two and moved with "O-L" buttons from keyboard.
 * ball move around the screen , reversing its direction when collides with the window boundaries or with the paddles.
 
 ### Layout Overview
-1. Main Menu
+#### 1. Main Menu
 * Single player   " press s " 
 * Multi player    " press m " 
 * Exit            " press esc " 
 
+#### 2. Game Difficulty
+there are three levels of ball speed
+* easy E
+* medium m
+* hard h
+* return to main menu
 
+#### 3. Start game 
+* In single mode : Enter the name of one player
+* In multi : Enter two players names
 
+#### 4. The game window 
+* two paddles 
+* ball
+* score of players within the game
 
-
+#### 5. Game over menu :
+* show the winner name 
+* R for play again 
+* esc to return to main menu
 
 
 
