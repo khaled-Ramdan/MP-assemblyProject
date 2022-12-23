@@ -71,15 +71,15 @@ DATA SEGMENT PARA 'DATA'
 	
 	;; Left Paddle ;;
 	PADDLE_LEFT_X  DW 0AH                       ; position of left paddle  X
-	PADDLE_LEFT_Y  DW 88H			    ; position of left paddle  Y
+	PADDLE_LEFT_Y  DW 50H			    ; position of left paddle  Y
 	PADDLE_L_ORIGINAL_X DW 0Ah
-	PADDLE_L_ORIGINAL_Y DW 88h
+	PADDLE_L_ORIGINAL_Y DW 50h
 	PLAYER_ONE_POINTS DB 0              ;current points of the left player (player one)
 	;; Right paddle ;;
 	PADDLE_RIGHT_X  DW 130H                     ; position of right paddle  X
-	PADDLE_RIGHT_Y  DW 88H			    ; position of right paddle  Y
+	PADDLE_RIGHT_Y  DW 50H			    ; position of right paddle  Y
 	PADDLE_R_ORIGINAL_X DW 130h
-	PADDLE_R_ORIGINAL_Y DW 88h
+	PADDLE_R_ORIGINAL_Y DW 50h
 	PLAYER_TWO_POINTS DB 0             ;current points of the right player (player two)
 	;; size of paddles ;;
 	PADDLE_WIDTH   DW 05H                       ; width of the paddle
