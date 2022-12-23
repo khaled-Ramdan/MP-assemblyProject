@@ -10,7 +10,7 @@ DATA SEGMENT PARA 'DATA'
 	WINDOW_BOUNDS DW 6;variable used to check collsions eaerly
 	
 	PERIOD DW 4
-	GOAL_PERIOD DW 10
+	GOAL_PERIOD DW 13
 	FLAG_GOAL DW 0H
 	TIME_AUX DB 0; variable used when checking if the time has changed
 	GAME_ACTIVE DB 1                     ;is the game active? (1 -> Yes, 0 -> No (game over))
@@ -64,7 +64,7 @@ DATA SEGMENT PARA 'DATA'
 	TEXT_START_GAME_TITLE DB   'START GAME' ,'$' ;text with START GAME MESSAGE
 	TEXT_NAME_PLAYER_ONE DB 'Enter name of player one:','$' ; Enter name of player one message
 	TEXT_NAME_PLAYER_TWO DB 'Enter name of player two:','$' ; Enter name of player two message
-	TEXT_GOAL DB 'GOAL', '$'
+	TEXT_GOAL DB 'GOOOOOAL', '$'
 	COMP DB 'computer','$'
  	wn DB 'WINS','$'
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   start paddle   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -552,7 +552,7 @@ CODE SEGMENT PARA 'CODE'
 		MOV AH,02h          ;set cursor position
 		MOV BH,00h          ;set page number
 		MOV DH,0Bh          ;set row
-		MOV DL,0Bh          ;set column
+		MOV DL,0Fh          ;set column
 		INT 10h
 	    
 		MOV AH,09h                       ; write string to standard output
