@@ -56,14 +56,21 @@ the objective is to strike the ball to go past the other player
 when the ball collides with left boundaries, a point is given to the right player,vice verse.
 ### the Game play
 The game has two modes *`single mode`* and *`multi mode`*
-* single mode __
-there is a single palyer palys against computer.__
-the player Enters his name and start the game. __
+* single mode
+
+there is a single palyer palys against computer.
+
+the player Enters his name and start the game.
+
 the paddle is moved using buttons "W-S" on the keyboard.
-* multi mode __
-There are two payers plays agianst each others
-Each player Enter his name and start the game.__
-the left paddle if for player one and moved with "W-S" buttons from keyboard.__
+* multi mode
+
+There are two payers plays agianst each others.
+
+Each player Enter his name and start the game.
+
+the left paddle if for player one and moved with "W-S" buttons from keyboard.
+
 the right paddle is for player two and moved with "O-L" buttons from keyboard.
 
 
