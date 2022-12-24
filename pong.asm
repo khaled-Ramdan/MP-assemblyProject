@@ -17,10 +17,11 @@ DATA SEGMENT PARA 'DATA'
 	EXITING_GAME DB 0
 	WINNER_INDEX DB 0                    ;the index of the winner (1 -> player one, 2 -> player two)
 	CURRENT_SCENE DB 0                   ; the index of the current scene(0->main menu , 1-> game)
-	Arr1 DB 10 , 0, 10 DUP('$')
-	Arr2 DB 10 , 0, 10 DUP('$')
+	Arr1 DB 11 , 0, 11 DUP('$')
+	Arr2 DB 11 , 0, 11 DUP('$')
 	INFO  DB 0  
 	SINGLE DB 00h
+	F DB 0
 	
 	BALL_ORIGINAL_X DW 0A0h
 	BALL_ORIGINAL_Y DW 64h
@@ -65,7 +66,7 @@ DATA SEGMENT PARA 'DATA'
 	TEXT_NAME_PLAYER_ONE DB 'Enter name of player one:','$' ; Enter name of player one message
 	TEXT_NAME_PLAYER_TWO DB 'Enter name of player two:','$' ; Enter name of player two message
 	TEXT_GOAL DB 'GOOOOOAL', '$'
-	COMP DB 'computer','$'
+	COMP DB 'EL Z3AMA','$'
  	wn DB 'WINS','$'
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   start paddle   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
@@ -627,7 +628,7 @@ CODE SEGMENT PARA 'CODE'
 		
 		ONE:
 		MOV AH,09h                       ; write string to standard output
-		LEA DX,Arr1+2     ;give DX a pointer to the string TEXT_GAME_OVER_WINNER 
+		LEA DX,Arr1+2    ;give DX a pointer to the string TEXT_GAME_OVER_WINNER 
 		INT 21h                          ;print the string
 		
 		ed:
@@ -783,6 +784,7 @@ CODE SEGMENT PARA 'CODE'
 	
 	DRAW_INFO_MENU PROC NEAR 
 	
+
 	    CALL CLEAR_SCREAN 
 		CALL PAINT_PIXELS_IN_BLACK
 ;	    shows SATRT GAMEtitle
@@ -804,25 +806,29 @@ CODE SEGMENT PARA 'CODE'
 			inc BX
 			cmp BX,0Ah
 			jne CLEAR_FNAME
-		
+					LOOOOOP:
 ;		show the player one name message
         MOV AH,02h          ;set cursor position
 		MOV BH,00h          ;set page number
 		MOV DH,06h          ;set row
 		MOV DL,04h          ;set column
 		INT 10h
-	    
+		
 		MOV AH,09h                       ; write string to standard output
 		LEA DX,TEXT_NAME_PLAYER_ONE     ;give DX a pointer to the string TEXT_MAIN_MENU_TITLE 
 		INT 21h                          ;print the string
-		
 		MOV AH , 0Ah
 		LEA DX,Arr1                        ; enter a string
-		MOV Arr1,6
+		MOV Arr1,8
 		INT 21h
+		MOV F, 1
+		CALL CHECK
+		CMP F, 0
+		JE LOOOOOP
 
 		cmp SINGLE,1
 		je NOSEC
+		LOOOOOP2:
 	;		show the player two name message
 			MOV AH,02h          ;set cursor position
 			MOV BH,00h          ;set page number
@@ -836,8 +842,12 @@ CODE SEGMENT PARA 'CODE'
 			
 			MOV AH , 0Ah
 			LEA DX,Arr2                        ; enter a string
-			MOV Arr2,6
+			MOV Arr2,8
 			INT 21h
+		MOV F, 1
+		CALL CHECK2
+		CMP F, 0
+		JE LOOOOOP2
 		NOSEC:
 		CALL PAINT_PIXELS_IN_BLACK
 		ret
@@ -1102,10 +1112,8 @@ CODE SEGMENT PARA 'CODE'
 		MOV AH,00h
 		INT 16h
 		
-;       If the key is either 'R' or 'r', restart the game		
 		CMP AL,0DH
 		JE CONTINUE_GAME
-;       If the key is either 'E' or 'e', exit to main menu
 		CMP AL,1BH
 		JE GO_TO_MAIN_MENU
 		
@@ -1328,6 +1336,25 @@ CODE SEGMENT PARA 'CODE'
 		
 		RET
 	UPDATE_TEXT_PLAYER_TWO_POINTS ENDP
+	
+	CHECK PROC NEAR
+	
+	CMP [Arr1 + 2], 0DH
+	JNE EXITTTT
+	MOV F, 0
+	EXITTTT:
+		RET
+	
+	CHECK ENDP
+	CHECK2 PROC NEAR
+	
+	CMP [Arr2 + 2], 0DH
+	JNE EXITTTT2
+	MOV F, 0
+	EXITTTT2:
+		RET
+	
+	CHECK2 ENDP
 			
 			
 			
